@@ -1,0 +1,4 @@
+Method,lambda_compute,n_folds,fold,val_acc,test_acc,avg_token_ratio,flop_reduction
+adaptive_gps,0.01,3,1,0.7226,0.7226,0.5714,0.5923
+adaptive_gps,0.01,3,2,0.6768,0.6768,0.5289,0.5452
+adaptive_gps,0.01,3,3,0.7041,0.7041,0.6200,0.3250
