@@ -81,8 +81,12 @@ def gene_arg():
     group.add_argument('--seed', type=int, default=12344)
 
     group = parser.add_argument_group('adaptive')
-    group.add_argument('--lambda_compute', type=float, default=0.01,
-                        help='weight for compute-cost penalty')
+    group.add_argument('--lambda_compute', type=float, default=0.1,
+                        help='weight for compute-cost penalty (default: 0.1)')
+    group.add_argument('--lambda_ratio', type=float, default=0.5,
+                        help='weight for target-ratio regularizer (default: 0.5)')
+    group.add_argument('--target_ratio', type=float, default=0.5,
+                        help='desired average token keep-ratio (default: 0.5)')
     group.add_argument('--tau_start', type=float, default=2.0,
                         help='initial Gumbel temperature')
     group.add_argument('--tau_end', type=float, default=0.5,
@@ -227,11 +231,13 @@ class AdaptiveGPS(torch.nn.Module):
 # =====================================================================
 # Train / Eval
 # =====================================================================
-def train_one_epoch(model, loader, optimizer, device, tau, lambda_compute):
+def train_one_epoch(model, loader, optimizer, device, tau, lambda_compute,
+                    lambda_ratio=0.5, target_ratio=0.5):
     model.train()
     total_loss = 0
     total_task_loss = 0
     total_compute_loss = 0
+    total_ratio_loss = 0
 
     for data in loader:
         data = data.to(device)
@@ -243,7 +249,14 @@ def train_one_epoch(model, loader, optimizer, device, tau, lambda_compute):
 
         task_loss = F.cross_entropy(logits, data.y)
         compute_loss = compute_cost
-        loss = task_loss + lambda_compute * compute_loss
+
+        # Ratio regularizer: penalise deviation from target keep-ratio
+        avg_ratio = tok_ratios.mean()
+        ratio_loss = (avg_ratio - target_ratio) ** 2
+
+        loss = (task_loss
+                + lambda_compute * compute_loss
+                + lambda_ratio * ratio_loss)
 
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=5.0)
@@ -252,9 +265,10 @@ def train_one_epoch(model, loader, optimizer, device, tau, lambda_compute):
         total_loss += loss.item() * data.num_graphs
         total_task_loss += task_loss.item() * data.num_graphs
         total_compute_loss += compute_cost.item() * data.num_graphs
+        total_ratio_loss += ratio_loss.item() * data.num_graphs
 
     n = len(loader.dataset)
-    return total_loss / n, total_task_loss / n, total_compute_loss / n
+    return total_loss / n, total_task_loss / n, total_compute_loss / n, total_ratio_loss / n
 
 
 @torch.no_grad()
@@ -329,8 +343,9 @@ def train_single_fold(args, fold_idx, train_indices, test_indices,
         frac = (epoch - 1) / max(args.epochs - 1, 1)
         tau = args.tau_start + (args.tau_end - args.tau_start) * frac
 
-        loss, task_l, comp_l = train_one_epoch(
-            model, train_loader, optimizer, device, tau, args.lambda_compute)
+        loss, task_l, comp_l, ratio_l = train_one_epoch(
+            model, train_loader, optimizer, device, tau, args.lambda_compute,
+            lambda_ratio=args.lambda_ratio, target_ratio=args.target_ratio)
 
         # In K-fold CV, the "test" split of the fold acts as our validation
         test_acc, test_ratio, test_flop_red = evaluate(model, test_loader, device, tau)
@@ -355,7 +370,7 @@ def train_single_fold(args, fold_idx, train_indices, test_indices,
 
         if epoch % 10 == 0 or epoch == 1 or epoch == args.epochs:
             print(f'  Fold {fold_idx+1} | Epoch {epoch:03d} | '
-                  f'Loss {loss:.4f} (task {task_l:.4f}, comp {comp_l:.4f}) | '
+                  f'Loss {loss:.4f} (task {task_l:.4f}, comp {comp_l:.4f}, ratio {ratio_l:.4f}) | '
                   f'Test {test_acc:.4f} | '
                   f'tau {tau:.2f} | avg_ratio {test_ratio:.3f} | '
                   f'FLOP_red {test_flop_red:.1%}')
