@@ -93,6 +93,12 @@ def gene_arg():
                         help='final Gumbel temperature')
     group.add_argument('--min_token_ratio', type=float, default=0.2,
                         help='minimum fraction of tokens to keep')
+    group.add_argument('--max_token_ratio', type=float, default=1.0,
+                        help='maximum fraction of tokens to keep (default: 1.0)')
+    group.add_argument('--size_prior_mix', type=float, default=0.0,
+                        help='blend weight for monotonic size prior in token ratios (0 disables)')
+    group.add_argument('--size_prior_temp', type=float, default=3.0,
+                        help='sharpness of monotonic size prior over log graph size')
     group.add_argument('--budget_hidden', type=int, default=64,
                         help='hidden dim of BudgetNet')
     group.add_argument('--max_k', type=int, default=512,
@@ -185,6 +191,9 @@ class AdaptiveGPS(torch.nn.Module):
             num_layers=num_layers,
             hidden_dim=args.budget_hidden,
             min_token_ratio=args.min_token_ratio,
+            max_token_ratio=args.max_token_ratio,
+            size_prior_mix=args.size_prior_mix,
+            size_prior_temp=args.size_prior_temp,
         )
 
         self.lin = Linear(channels, num_tasks)
@@ -311,14 +320,44 @@ def evaluate(model, loader, device, tau=0.5, return_details=False):
             tr_np = tok_ratios.cpu().numpy()                        # [B, num_layers]
             lg_np = lay_gates.cpu().numpy()                         # [B, num_layers]
 
+            # Compute edges per graph
+            batch_cpu = data.batch.cpu()
+            edge_index_cpu = data.edge_index.cpu()
+            edges_per_graph = torch.zeros(len(nodes_per_graph), dtype=torch.long)
+            for edge_src, edge_dst in edge_index_cpu.t():
+                graph_id = batch_cpu[edge_src.item()]
+                edges_per_graph[graph_id] += 1
+            edges_per_graph = edges_per_graph.numpy() / 2.0  # undirected edges
+
+            # Compute degree stats per graph
+            from torch_geometric.utils import degree as compute_degree
+            deg = compute_degree(edge_index_cpu[0], num_nodes=data.x.size(0)).cpu().numpy()
+            
+            deg_per_graph_mean = np.zeros(len(nodes_per_graph))
+            deg_per_graph_var = np.zeros(len(nodes_per_graph))
+            for g_id in range(len(nodes_per_graph)):
+                mask = (batch_cpu == g_id).numpy()
+                if mask.sum() > 0:
+                    g_degs = deg[mask]
+                    deg_per_graph_mean[g_id] = float(g_degs.mean())
+                    deg_per_graph_var[g_id] = float(g_degs.var()) if len(g_degs) > 1 else 0.0
+
             for i in range(len(true_labels)):
+                num_n = int(nodes_per_graph[i])
+                num_e = edges_per_graph[i]
+                density = (2.0 * num_e) / (num_n * (num_n - 1) + 1e-8) if num_n > 1 else 0.0
+                
                 details.append({
-                    "num_nodes":        int(nodes_per_graph[i]),
-                    "true_label":       int(true_labels[i]),
-                    "pred_label":       int(pred_labels[i]),
-                    "avg_token_ratio":  float(tr_np[i].mean()),
-                    "avg_layer_gate":   float(lg_np[i].mean()),
-                    "correct":          int(true_labels[i] == pred_labels[i]),
+                    "num_nodes":           int(num_n),
+                    "num_edges":           int(num_e),
+                    "density":             float(density),
+                    "avg_degree":          float(deg_per_graph_mean[i]),
+                    "degree_variance":     float(deg_per_graph_var[i]),
+                    "true_label":          int(true_labels[i]),
+                    "pred_label":          int(pred_labels[i]),
+                    "avg_token_ratio":     float(tr_np[i].mean()),
+                    "avg_layer_gate":      float(lg_np[i].mean()),
+                    "correct":             int(true_labels[i] == pred_labels[i]),
                 })
 
     acc = correct / len(loader.dataset)

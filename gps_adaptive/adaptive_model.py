@@ -27,15 +27,27 @@ class BudgetNet(nn.Module):
         - node_emb:     Embedded node features      [N_total, channels]
 
     Outputs:
-        - token_ratios: [B, num_layers]  keep-ratio in [min_ratio, 1.0]
-        - layer_gates:  [B, num_layers]  survival probability in [0, 1]
+        - token_ratios: [B, num_layers] keep-ratio in [min_ratio, max_ratio]
+        - layer_gates:  [B, num_layers] survival probability in [0, 1]
     """
 
     def __init__(self, channels: int, num_layers: int,
-                 hidden_dim: int = 64, min_token_ratio: float = 0.2):
+                 hidden_dim: int = 64, min_token_ratio: float = 0.2,
+                 max_token_ratio: float = 1.0,
+                 size_prior_mix: float = 0.0,
+                 size_prior_temp: float = 3.0):
         super().__init__()
         self.num_layers = num_layers
         self.min_ratio = min_token_ratio
+        self.max_ratio = max_token_ratio
+        if self.max_ratio <= self.min_ratio:
+            raise ValueError("max_token_ratio must be greater than min_token_ratio")
+        if not 0.0 <= size_prior_mix <= 1.0:
+            raise ValueError("size_prior_mix must be in [0, 1]")
+        if size_prior_temp <= 0.0:
+            raise ValueError("size_prior_temp must be > 0")
+        self.size_prior_mix = float(size_prior_mix)
+        self.size_prior_temp = float(size_prior_temp)
 
         # --- Stream 1: Structural features (5 scalars) ---
         # Dedicated pathway so graph-structure signal can't be drowned out
@@ -96,9 +108,21 @@ class BudgetNet(nn.Module):
         # --- Additive combination (equal weighting of both streams) ---
         h = self.combine(struct_h + emb_h)
 
-        # token ratios:  sigmoid -> [0,1]  then  affine -> [min_ratio, 1.0]
+        # Learned token ratios: sigmoid -> [0,1] then affine -> [min_ratio, max_ratio]
         raw_tok = torch.sigmoid(self.token_head(h))
-        token_ratios = self.min_ratio + (1.0 - self.min_ratio) * raw_tok   # [B, L]
+        learned_token_ratios = self.min_ratio + (self.max_ratio - self.min_ratio) * raw_tok
+
+        if self.size_prior_mix > 0.0:
+            # Monotonic size prior: smaller graphs keep more tokens, larger graphs keep fewer.
+            size_std = log_N.std(unbiased=False).clamp_min(1e-6)
+            size_z = (log_N - log_N.mean()) / size_std                                # [B, 1]
+            size_prior = torch.sigmoid(-self.size_prior_temp * size_z)                # [B, 1]
+            size_prior = size_prior.expand(-1, self.num_layers)                       # [B, L]
+            prior_token_ratios = self.min_ratio + (self.max_ratio - self.min_ratio) * size_prior
+            token_ratios = ((1.0 - self.size_prior_mix) * learned_token_ratios
+                            + self.size_prior_mix * prior_token_ratios)
+        else:
+            token_ratios = learned_token_ratios
 
         # layer gates:  sigmoid  (used as soft gate or hard via Gumbel)
         layer_gates = torch.sigmoid(self.layer_head(h))                    # [B, L]

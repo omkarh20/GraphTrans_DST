@@ -1,0 +1,2 @@
+epoch,loss,task_loss,compute_loss,test_acc,avg_token_ratio,flop_reduction,tau
+1,0.659061,0.657167,0.021694,0.6870,0.5765,0.6643,2.0000
