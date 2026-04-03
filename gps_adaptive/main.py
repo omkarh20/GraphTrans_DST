@@ -81,10 +81,10 @@ def gene_arg():
     group.add_argument('--seed', type=int, default=12344)
 
     group = parser.add_argument_group('adaptive')
-    group.add_argument('--lambda_compute', type=float, default=0.1,
-                        help='weight for compute-cost penalty (default: 0.1)')
-    group.add_argument('--lambda_ratio', type=float, default=0.5,
-                        help='weight for target-ratio regularizer (default: 0.5)')
+    group.add_argument('--lambda_compute', type=float, default=0.5,
+                        help='weight for compute-cost penalty (default: 0.5)')
+    group.add_argument('--lambda_ratio', type=float, default=0.01,
+                        help='weight for target-ratio regularizer (default: 0.01)')
     group.add_argument('--target_ratio', type=float, default=0.5,
                         help='desired average token keep-ratio (default: 0.5)')
     group.add_argument('--tau_start', type=float, default=2.0,
@@ -210,11 +210,11 @@ class AdaptiveGPS(torch.nn.Module):
                      layer_gate=lg,
                      tau=tau)
 
-            # Collect FLOP proxy per layer
-            k_avg = conv._last_k_avg
-            L_val = conv._last_L
-            layer_cost = (k_avg ** 2) / (L_val ** 2 + 1e-8)
-            layer_cost = layer_cost * lg.mean()
+            # Collect FLOP proxy per layer (differentiable)
+            # Use continuous token_ratio directly instead of post-integer k_avg
+            # so gradients flow back to BudgetNet's token_head.
+            # tr.mean() ≈ k/L, so tr.mean()**2 is a differentiable proxy for (k/L)²
+            layer_cost = (tr.mean() ** 2) * lg.mean()
             compute_costs.append(layer_cost)
 
             # Collect exact MAC counts (Phase 2)
@@ -272,12 +272,13 @@ def train_one_epoch(model, loader, optimizer, device, tau, lambda_compute,
 
 
 @torch.no_grad()
-def evaluate(model, loader, device, tau=0.5):
+def evaluate(model, loader, device, tau=0.5, return_details=False):
     model.eval()
     correct = 0
     total_k_ratios = []
     sum_actual_macs = 0.0
     sum_dense_macs = 0.0
+    details = []
 
     for data in loader:
         data = data.to(device)
@@ -290,9 +291,30 @@ def evaluate(model, loader, device, tau=0.5):
         sum_actual_macs += actual_macs
         sum_dense_macs += dense_macs
 
+        if return_details:
+            # data.batch.bincount() = number of nodes per graph in this batch
+            nodes_per_graph = data.batch.bincount().cpu().numpy()  # [B]
+            true_labels = data.y.cpu().numpy()                     # [B]
+            pred_labels = pred.cpu().numpy()                        # [B]
+            tr_np = tok_ratios.cpu().numpy()                        # [B, num_layers]
+            lg_np = lay_gates.cpu().numpy()                         # [B, num_layers]
+
+            for i in range(len(true_labels)):
+                details.append({
+                    "num_nodes":        int(nodes_per_graph[i]),
+                    "true_label":       int(true_labels[i]),
+                    "pred_label":       int(pred_labels[i]),
+                    "avg_token_ratio":  float(tr_np[i].mean()),
+                    "avg_layer_gate":   float(lg_np[i].mean()),
+                    "correct":          int(true_labels[i] == pred_labels[i]),
+                })
+
     acc = correct / len(loader.dataset)
     avg_ratio = np.mean(total_k_ratios)
     flop_reduction = 1.0 - (sum_actual_macs / (sum_dense_macs + 1e-12))
+
+    if return_details:
+        return acc, avg_ratio, flop_reduction, details
     return acc, avg_ratio, flop_reduction
 
 
@@ -384,16 +406,24 @@ def train_single_fold(args, fold_idx, train_indices, test_indices,
         writer.writerows(epoch_log)
     print(f"  Epoch log saved to: {epoch_log_file}")
 
-    # --- Load best model and get final metrics ---
+    # --- Load best model and get final metrics + per-graph decisions ---
     model.load_state_dict(
         torch.load(os.path.join(fold_save_dir, "best_model.pt"),
                    weights_only=True))
-    final_acc, final_ratio, final_flop_red = evaluate(
-        model, test_loader, device, tau=args.tau_end)
+    final_acc, final_ratio, final_flop_red, graph_details = evaluate(
+        model, test_loader, device, tau=args.tau_end, return_details=True)
 
     print(f"  Fold {fold_idx+1} BEST => Acc: {final_acc:.4f} | "
           f"Avg Token Ratio: {final_ratio:.3f} | "
           f"FLOP Reduction: {final_flop_red:.1%}")
+
+    # --- Save per-graph BudgetNet decisions for paper analysis ---
+    stats_file = os.path.join(fold_save_dir, "graph_stats.csv")
+    with open(stats_file, "w", newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=graph_details[0].keys())
+        writer.writeheader()
+        writer.writerows(graph_details)
+    print(f"  Per-graph stats saved to: {stats_file}")
 
     return final_acc, final_ratio, final_flop_red
 
