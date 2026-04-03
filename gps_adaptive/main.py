@@ -83,10 +83,10 @@ def gene_arg():
     group = parser.add_argument_group('adaptive')
     group.add_argument('--lambda_compute', type=float, default=0.5,
                         help='weight for compute-cost penalty (default: 0.5)')
-    group.add_argument('--lambda_ratio', type=float, default=0.01,
-                        help='weight for target-ratio regularizer (default: 0.01)')
-    group.add_argument('--target_ratio', type=float, default=0.5,
-                        help='desired average token keep-ratio (default: 0.5)')
+    group.add_argument('--lambda_ratio', type=float, default=0.1,
+                        help='weight for target-ratio regularizer (default: 0.1)')
+    group.add_argument('--target_ratio', type=float, default=0.7,
+                        help='desired average token keep-ratio (default: 0.7)')
     group.add_argument('--tau_start', type=float, default=2.0,
                         help='initial Gumbel temperature')
     group.add_argument('--tau_end', type=float, default=0.5,
@@ -210,11 +210,10 @@ class AdaptiveGPS(torch.nn.Module):
                      layer_gate=lg,
                      tau=tau)
 
-            # Collect FLOP proxy per layer (differentiable)
-            # Use continuous token_ratio directly instead of post-integer k_avg
-            # so gradients flow back to BudgetNet's token_head.
-            # tr.mean() ≈ k/L, so tr.mean()**2 is a differentiable proxy for (k/L)²
-            layer_cost = (tr.mean() ** 2) * lg.mean()
+            # Collect FLOP proxy per layer (differentiable, PER-GRAPH)
+            # Element-wise tr² * lg gives each graph its own gradient signal:
+            # a graph keeping 80% of tokens gets 4× the penalty of one keeping 40%.
+            layer_cost = (tr ** 2 * lg).mean()
             compute_costs.append(layer_cost)
 
             # Collect exact MAC counts (Phase 2)
@@ -247,8 +246,21 @@ def train_one_epoch(model, loader, optimizer, device, tau, lambda_compute,
             data.x, data.pe, data.edge_index, data.edge_attr,
             data.batch, tau=tau)
 
-        task_loss = F.cross_entropy(logits, data.y)
-        compute_loss = compute_cost
+        # --- Node-count and graph-level loss computation ---
+        N_per_graph = torch.bincount(data.batch).float()    # [B] number of nodes per graph
+
+        # --- Size-normalized task loss (breaks gradient symmetry) ---
+        # Logits are graph-level, so compute per-graph CE directly and normalize by log(N)
+        task_loss_per_graph = F.cross_entropy(logits, data.y, reduction='none')  # [B]
+        task_loss = (task_loss_per_graph / torch.log1p(N_per_graph)).mean()
+
+        # --- Node-count-weighted compute cost ---
+        # Large graphs get proportionally more pruning pressure because
+        # O(k²) attention means pruning them saves far more FLOPs.
+        # A 5000-node graph gets ~17× the penalty of a 300-node graph.
+        node_weights = N_per_graph / N_per_graph.mean()     # relative, mean=1
+        # tok_ratios: [B, L], lay_gates: [B, L], node_weights: [B] → [B, 1]
+        compute_loss = (tok_ratios ** 2 * lay_gates * node_weights.unsqueeze(1)).mean()
 
         # Ratio regularizer: penalise deviation from target keep-ratio
         avg_ratio = tok_ratios.mean()

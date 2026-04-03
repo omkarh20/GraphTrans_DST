@@ -290,6 +290,18 @@ class GPSConv(torch.nn.Module):
 
         h = F.dropout(h, p=self.dropout, training=self.training)
         h = h + x  # Residual connection
+
+        # --- Differentiable coupling: scale attention output by token_ratio ---
+        # This creates a gradient path: task_loss → h → token_ratio → BudgetNet
+        # Without this, task_loss cannot tell the BudgetNet which graphs need
+        # more tokens (because .ceil().long() in line 208 kills gradients).
+        # A graph that *needs* attention to classify correctly will push its
+        # token_ratio UP (to make this scaling larger), while easy graphs
+        # can afford a low ratio (attention contribution is down-weighted).
+        if token_ratio is not None:
+            ratio_weight = token_ratio[batch].unsqueeze(-1)  # [N_total, 1]
+            h = h * ratio_weight
+
         if self.norm2 is not None:
             if self.norm_with_batch:
                 h = self.norm2(h, batch=batch)

@@ -3,6 +3,11 @@ BudgetNet: Graph-Conditioned Adaptive Budget Controller
 ========================================================
 Takes graph-level statistics and a pooled node embedding, then predicts
 per-layer keep-ratios for tokens and per-layer survival gates for layers.
+
+Architecture: Two-stream design ensures structural features (num_nodes,
+num_edges, density, degree stats) have equal influence to the pooled
+node embedding, preventing the embedding from drowning out the
+graph-structure signal that drives adaptive budget decisions.
 """
 
 import torch
@@ -32,12 +37,24 @@ class BudgetNet(nn.Module):
         self.num_layers = num_layers
         self.min_ratio = min_token_ratio
 
-        # 5 hand-crafted scalars  +  pooled node embedding
-        input_dim = 5 + channels
-
-        self.mlp = nn.Sequential(
-            nn.Linear(input_dim, hidden_dim),
+        # --- Stream 1: Structural features (5 scalars) ---
+        # Dedicated pathway so graph-structure signal can't be drowned out
+        # Remove LayerNorm to preserve absolute scale (log N, log E magnitude matters)
+        self.struct_norm = nn.Identity()
+        self.struct_mlp = nn.Sequential(
+            nn.Linear(5, hidden_dim),
             nn.ReLU(inplace=True),
+        )
+
+        # --- Stream 2: Pooled node embedding ---
+        # Compressed to prevent dominance over structural features
+        self.emb_proj = nn.Sequential(
+            nn.Linear(channels, hidden_dim),
+            nn.ReLU(inplace=True),
+        )
+
+        # --- Combined processing ---
+        self.combine = nn.Sequential(
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(inplace=True),
         )
@@ -67,12 +84,17 @@ class BudgetNet(nn.Module):
         deg_sq   = global_mean_pool((deg ** 2).unsqueeze(-1), batch) # [B, 1]
         deg_var  = (deg_sq - avg_deg ** 2).clamp(min=0)              # [B, 1]
 
-        # --- pooled node embedding ---
-        pooled = global_mean_pool(node_emb, batch)                   # [B, channels]
+        struct_feats = torch.cat([log_N, log_E, density, avg_deg, deg_var], dim=-1)  # [B, 5]
 
-        feats = torch.cat([log_N, log_E, density, avg_deg, deg_var, pooled], dim=-1)
+        # --- Stream 1: Structural features with normalization ---
+        struct_h = self.struct_mlp(self.struct_norm(struct_feats))    # [B, hidden_dim]
 
-        h = self.mlp(feats)
+        # --- Stream 2: Pooled embedding (detached to force reliance on structure) ---
+        pooled = global_mean_pool(node_emb.detach(), batch)          # [B, channels]
+        emb_h = self.emb_proj(pooled)                                # [B, hidden_dim]
+
+        # --- Additive combination (equal weighting of both streams) ---
+        h = self.combine(struct_h + emb_h)
 
         # token ratios:  sigmoid -> [0,1]  then  affine -> [min_ratio, 1.0]
         raw_tok = torch.sigmoid(self.token_head(h))
