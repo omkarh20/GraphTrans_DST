@@ -374,19 +374,32 @@ def evaluate(model, loader, device, tau=0.5, return_details=False):
 # =====================================================================
 def train_single_fold(args, fold_idx, train_indices, test_indices,
                       dataset, num_tasks, num_features, device):
-    """Train and evaluate one fold. Returns best val acc, test acc, avg ratio."""
+    """Train and evaluate one fold. Returns val acc, test acc, avg ratio (3-way split: 80/10/10)."""
+
+    # --- Sub-split to get 80% train / 10% val / 10% test ---
+    # Original K-fold has 90% train, 10% test
+    # We want 80% train, 10% val, 10% test
+    # So split the 90% train_indices by taking 1/9 for val
+    train_indices = train_indices.copy()
+    np.random.shuffle(train_indices)  # Random selection of val samples
+    val_split = int(len(train_indices) / 9)
+    val_indices = train_indices[:val_split]
+    train_indices = train_indices[val_split:]
+    # test_indices remains as the final 10%
 
     print(f"\n{'='*60}")
     print(f"  FOLD {fold_idx + 1} / {args.n_folds}")
-    print(f"  Train size: {len(train_indices)}, Test size: {len(test_indices)}")
+    print(f"  Train size: {len(train_indices)} (80%), Val size: {len(val_indices)} (10%), Test size: {len(test_indices)} (10%)")
     print(f"{'='*60}")
 
     # --- Create data loaders for this fold ---
     train_subset = Subset(dataset, train_indices.tolist())
+    val_subset = Subset(dataset, val_indices.tolist())
     test_subset = Subset(dataset, test_indices.tolist())
 
     train_loader = DataLoader(train_subset, batch_size=args.batch_size,
                               shuffle=True)
+    val_loader = DataLoader(val_subset, batch_size=args.eval_batch_size)
     test_loader = DataLoader(test_subset, batch_size=args.eval_batch_size)
 
     # --- Fresh model for each fold ---
@@ -407,7 +420,7 @@ def train_single_fold(args, fold_idx, train_indices, test_indices,
 
     # --- Training loop ---
     best_train_acc = 0
-    best_test_acc = 0
+    best_val_acc = 0
     best_ratio = 0
     epoch_log = []  # Per-epoch metrics for training curves
 
@@ -420,8 +433,8 @@ def train_single_fold(args, fold_idx, train_indices, test_indices,
             model, train_loader, optimizer, device, tau, args.lambda_compute,
             lambda_ratio=args.lambda_ratio, target_ratio=args.target_ratio)
 
-        # In K-fold CV, the "test" split of the fold acts as our validation
-        test_acc, test_ratio, test_flop_red = evaluate(model, test_loader, device, tau)
+        # Use val set for model selection (early stopping)
+        val_acc, val_ratio, val_flop_red = evaluate(model, val_loader, device, tau)
 
         # Record every epoch for training curve plots
         epoch_log.append({
@@ -429,24 +442,24 @@ def train_single_fold(args, fold_idx, train_indices, test_indices,
             "loss": f"{loss:.6f}",
             "task_loss": f"{task_l:.6f}",
             "compute_loss": f"{comp_l:.6f}",
-            "test_acc": f"{test_acc:.4f}",
-            "avg_token_ratio": f"{test_ratio:.4f}",
-            "flop_reduction": f"{test_flop_red:.4f}",
+            "val_acc": f"{val_acc:.4f}",
+            "avg_token_ratio": f"{val_ratio:.4f}",
+            "flop_reduction": f"{val_flop_red:.4f}",
             "tau": f"{tau:.4f}",
         })
 
-        if best_test_acc < test_acc:
-            best_test_acc = test_acc
-            best_ratio = test_ratio
+        if best_val_acc < val_acc:
+            best_val_acc = val_acc
+            best_ratio = val_ratio
             torch.save(model.state_dict(),
                        os.path.join(fold_save_dir, "best_model.pt"))
 
         if epoch % 10 == 0 or epoch == 1 or epoch == args.epochs:
             print(f'  Fold {fold_idx+1} | Epoch {epoch:03d} | '
                   f'Loss {loss:.4f} (task {task_l:.4f}, comp {comp_l:.4f}, ratio {ratio_l:.4f}) | '
-                  f'Test {test_acc:.4f} | '
-                  f'tau {tau:.2f} | avg_ratio {test_ratio:.3f} | '
-                  f'FLOP_red {test_flop_red:.1%}')
+                  f'Val {val_acc:.4f} | '
+                  f'tau {tau:.2f} | avg_ratio {val_ratio:.3f} | '
+                  f'FLOP_red {val_flop_red:.1%}')
 
     # --- Save epoch log to CSV ---
     import csv
@@ -457,18 +470,24 @@ def train_single_fold(args, fold_idx, train_indices, test_indices,
         writer.writerows(epoch_log)
     print(f"  Epoch log saved to: {epoch_log_file}")
 
-    # --- Load best model and get final metrics + per-graph decisions ---
+    # --- Load best model and get final metrics on independent test set ---
     model.load_state_dict(
         torch.load(os.path.join(fold_save_dir, "best_model.pt"),
                    weights_only=True))
-    final_acc, final_ratio, final_flop_red, graph_details = evaluate(
+    
+    # Evaluate on independent test set (never seen during training or model selection)
+    final_test_acc, final_test_ratio, final_test_flop_red, graph_details = evaluate(
         model, test_loader, device, tau=args.tau_end, return_details=True)
+    
+    # Also get validation accuracy for reference
+    final_val_acc, _, _ = evaluate(
+        model, val_loader, device, tau=args.tau_end, return_details=False)
 
-    print(f"  Fold {fold_idx+1} BEST => Acc: {final_acc:.4f} | "
-          f"Avg Token Ratio: {final_ratio:.3f} | "
-          f"FLOP Reduction: {final_flop_red:.1%}")
+    print(f"  Fold {fold_idx+1} BEST => Val: {final_val_acc:.4f} | Test: {final_test_acc:.4f} | "
+          f"Avg Token Ratio: {final_test_ratio:.3f} | "
+          f"FLOP Reduction: {final_test_flop_red:.1%}")
 
-    # --- Save per-graph BudgetNet decisions for paper analysis ---
+    # --- Save per-graph BudgetNet decisions for paper analysis (from test set) ---
     stats_file = os.path.join(fold_save_dir, "graph_stats.csv")
     with open(stats_file, "w", newline='') as f:
         writer = csv.DictWriter(f, fieldnames=graph_details[0].keys())
@@ -476,7 +495,7 @@ def train_single_fold(args, fold_idx, train_indices, test_indices,
         writer.writerows(graph_details)
     print(f"  Per-graph stats saved to: {stats_file}")
 
-    return final_acc, final_ratio, final_flop_red
+    return final_val_acc, final_test_acc, final_test_ratio, final_test_flop_red
 
 
 # =====================================================================
@@ -526,14 +545,14 @@ def main():
     for fold_idx, (train_idx, test_idx) in enumerate(skf.split(
             np.zeros(len(dataset)), labels)):
 
-        fold_acc, fold_ratio, fold_flop_red = train_single_fold(
+        fold_val_acc, fold_test_acc, fold_ratio, fold_flop_red = train_single_fold(
             args, fold_idx, train_idx, test_idx,
             dataset, num_tasks, num_features, device)
 
         fold_results.append({
             "fold": fold_idx + 1,
-            "val_acc": fold_acc,      # In K-fold, the held-out fold = "test"
-            "test_acc": fold_acc,     # Same split in K-fold
+            "val_acc": fold_val_acc,      # Independent validation set
+            "test_acc": fold_test_acc,    # Independent test set
             "avg_token_ratio": fold_ratio,
             "flop_reduction": fold_flop_red,
         })

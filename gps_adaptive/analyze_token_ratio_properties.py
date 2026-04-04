@@ -10,7 +10,7 @@ import seaborn as sns
 from scipy.stats import spearmanr, pearsonr
 
 # Configuration
-csv_path = r"exps\DD_adaptive_cv3-04_03-20_53_44\fold_0\graph_stats.csv"
+csv_path = r"exps\DD_adaptive_cv10-04_03-21_06_08\fold_1\graph_stats.csv"
 output_prefix = "token_ratio_analysis"
 
 # Load data
