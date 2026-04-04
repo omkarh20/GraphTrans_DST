@@ -91,11 +91,11 @@ def gene_arg():
                         help='initial Gumbel temperature')
     group.add_argument('--tau_end', type=float, default=0.5,
                         help='final Gumbel temperature')
-    group.add_argument('--min_token_ratio', type=float, default=0.2,
+    group.add_argument('--min_token_ratio', type=float, default=0.40,
                         help='minimum fraction of tokens to keep')
-    group.add_argument('--max_token_ratio', type=float, default=1.0,
-                        help='maximum fraction of tokens to keep (default: 1.0)')
-    group.add_argument('--size_prior_mix', type=float, default=0.0,
+    group.add_argument('--max_token_ratio', type=float, default=0.70,
+                        help='maximum fraction of tokens to keep')
+    group.add_argument('--size_prior_mix', type=float, default=0.45,
                         help='blend weight for monotonic size prior in token ratios (0 disables)')
     group.add_argument('--size_prior_temp', type=float, default=3.0,
                         help='sharpness of monotonic size prior over log graph size')
