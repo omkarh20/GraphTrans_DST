@@ -435,6 +435,9 @@ def train_single_fold(args, fold_idx, train_indices, test_indices,
 
         # Use val set for model selection (early stopping)
         val_acc, val_ratio, val_flop_red = evaluate(model, val_loader, device, tau)
+        
+        # Also evaluate on test set for monitoring (but not used for model selection)
+        test_acc, test_ratio, test_flop_red = evaluate(model, test_loader, device, tau)
 
         # Record every epoch for training curve plots
         epoch_log.append({
@@ -443,6 +446,7 @@ def train_single_fold(args, fold_idx, train_indices, test_indices,
             "task_loss": f"{task_l:.6f}",
             "compute_loss": f"{comp_l:.6f}",
             "val_acc": f"{val_acc:.4f}",
+            "test_acc": f"{test_acc:.4f}",
             "avg_token_ratio": f"{val_ratio:.4f}",
             "flop_reduction": f"{val_flop_red:.4f}",
             "tau": f"{tau:.4f}",
@@ -457,7 +461,7 @@ def train_single_fold(args, fold_idx, train_indices, test_indices,
         if epoch % 10 == 0 or epoch == 1 or epoch == args.epochs:
             print(f'  Fold {fold_idx+1} | Epoch {epoch:03d} | '
                   f'Loss {loss:.4f} (task {task_l:.4f}, comp {comp_l:.4f}, ratio {ratio_l:.4f}) | '
-                  f'Val {val_acc:.4f} | '
+                  f'Val {val_acc:.4f} | Test {test_acc:.4f} | '
                   f'tau {tau:.2f} | avg_ratio {val_ratio:.3f} | '
                   f'FLOP_red {val_flop_red:.1%}')
 
