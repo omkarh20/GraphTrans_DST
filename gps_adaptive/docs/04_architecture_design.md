@@ -81,47 +81,53 @@ Standard MLPs fail to learn size-dependent pruning because:
 
 ```python
 class BudgetNet(nn.Module):
-    def __init__(self, in_features_struct=5, in_features_emb=89, hidden_dim=64, 
-                 num_layers=4, min_ratio=0.40, max_ratio=0.70):
+    def __init__(self, channels: int, num_layers: int,
+                 hidden_dim: int = 64, min_token_ratio: float = 0.2,
+                 max_token_ratio: float = 1.0,
+                 size_prior_mix: float = 0.0,
+                 size_prior_temp: float = 3.0):
         super().__init__()
         
-        # Stream 1: Structural features
+        # Stream 1: Structural features (single-layer projection)
+        # Remove LayerNorm to preserve absolute scale (log N, log E magnitude matters)
+        self.struct_norm = nn.Identity()
         self.struct_mlp = nn.Sequential(
-            nn.Linear(in_features_struct, hidden_dim),    # 5×64 + 64 = 384 params
-            nn.ReLU(),
-            nn.Linear(hidden_dim, hidden_dim)             # 64×64 + 64 = 4,160 params
+            nn.Linear(5, hidden_dim),           # 5→64 = 384 params
+            nn.ReLU(inplace=True),
         )
         
-        # Stream 2: Embedding features
+        # Stream 2: Embedding features (single-layer projection)
+        # Compressed to prevent dominance over structural features
         self.emb_proj = nn.Sequential(
-            nn.Linear(in_features_emb, hidden_dim),       # 89×64 + 64 = 5,760 params
-            nn.ReLU(),
-            nn.Linear(hidden_dim, hidden_dim)             # 64×64 + 64 = 4,160 params
+            nn.Linear(channels, hidden_dim),    # channels→64
+            nn.ReLU(inplace=True),
         )
         
-        # Combine streams (additive)
+        # Combine streams (additive, not concatenation)
         self.combine = nn.Sequential(
-            nn.Linear(hidden_dim, hidden_dim),            # 64×64 + 64 = 4,160 params
-            nn.ReLU()
+            nn.Linear(hidden_dim, hidden_dim),  # 64→64 = 4,160 params
+            nn.ReLU(inplace=True),
         )
         
         # Output heads
-        self.token_head = nn.Linear(hidden_dim, num_layers)  # 64×4 + 4 = 260 params
-        self.layer_head = nn.Linear(hidden_dim, num_layers)  # 64×4 + 4 = 260 params
+        self.token_head = nn.Linear(hidden_dim, num_layers)
+        self.layer_head = nn.Linear(hidden_dim, num_layers)
         
-        self.min_ratio = min_ratio
-        self.max_ratio = max_ratio
+        self.min_ratio = min_token_ratio
+        self.max_ratio = max_token_ratio
+        self.size_prior_mix = float(size_prior_mix)
+        self.size_prior_temp = float(size_prior_temp)
 ```
 
 **Parameter Count Breakdown:**
 | Component | Calculation | Parameters |
 |-----------|-------------|-----------|
-| struct_mlp | 5→64 + 64→64 | (5×64 + 64) + (64×64 + 64) = 4,544 |
-| emb_proj | 89→64 + 64→64 | (89×64 + 64) + (64×64 + 64) = 9,920 |
+| struct_mlp | 5→64 | 5×64 + 64 = 384 |
+| emb_proj | channels→64 | channels×64 + 64 |
 | combine | 64→64 | 64×64 + 64 = 4,160 |
 | token_head | 64→num_layers | 64×4 + 4 = 260 |
 | layer_head | 64→num_layers | 64×4 + 4 = 260 |
-| **Total BudgetNet** | | **~10,564** |
+| **Total BudgetNet** | | **~5,124** (plus channels×64) |
 
 ---
 
@@ -176,23 +182,47 @@ Why blend learned + architectural priors?
 
 ### Multi-Objective Loss
 
-```python
-loss = loss_cls + λ_compute × loss_efficiency
+The loss function balances three competing objectives:
 
-loss_cls = CrossEntropyLoss(predictions, labels)
-loss_efficiency = mean(token_ratios)  # Encourage sparsity
+```python
+# Size-normalized task loss (breaks gradient symmetry across graph sizes)
+N_per_graph = torch.bincount(data.batch).float()
+task_loss_per_graph = F.cross_entropy(logits, data.y, reduction='none')  # [B]
+task_loss = (task_loss_per_graph / torch.log1p(N_per_graph)).mean()
+
+# Node-count-weighted compute cost
+# Large graphs get proportionally more pruning pressure because:
+# - O(k²) attention means pruning saves far more FLOPs on large graphs
+# - A 5000-node graph gets ~17× the penalty of a 300-node graph
+node_weights = N_per_graph / N_per_graph.mean()
+compute_loss = (token_ratios ** 2 * layer_gates * node_weights.unsqueeze(1)).mean()
+
+# Ratio regularizer: maintain target token keep-ratio
+avg_ratio = token_ratios.mean()
+ratio_loss = (avg_ratio - target_ratio) ** 2
+
+# Total loss combines all three objectives
+loss = task_loss + λ_compute × compute_loss + λ_ratio × ratio_loss
 ```
 
+**Key design insights:**
+1. **Size-normalized task loss**: Dividing by log(N) prevents large graphs from dominating training
+2. **Node-weighted compute loss**: Enforces stronger pruning pressure on large graphs where it matters most
+3. **Target ratio regularization**: Maintains desired sparsity level across all training graphs
+
 **Hyperparameters:**
-- `λ_compute` = 0.10 (efficiency loss weight)
-- `λ_ratio` = 0.0 (per-layer variance penalty, disabled)
+- `λ_compute` = 0.5 (weight for compute-cost penalty)
+- `λ_ratio` = 0.1 (weight for target-ratio regularizer)
+- `target_ratio` = 0.7 (desired average token keep-ratio)
 
 ### Optimization
 
-- **Optimizer**: Adams with learning rate = 0.001
+- **Optimizer**: Adam with learning rate = 0.001
 - **Epochs**: 100 per fold
 - **Batch size**: 4 (small graphs, batch important for variance)
 - **Scheduler**: ReduceLROnPlateau (patience=30, factor=0.5)
+- **Gradient clipping**: max_norm=5.0
+- **Gumbel temperature annealing**: τ_start=2.0 → τ_end=0.5 over epochs
 
 ---
 
@@ -233,15 +263,16 @@ test_accuracy = evaluate(best_model, test_set)
 
 ### Metrics
 
-For each fold:
+For each fold and each evaluation:
 1. **Accuracy**: Classification accuracy on test set
-2. **Token Ratio**: Mean token ratio across all layers (targets ~0.48)
-3. **FLOP Reduction**: Percentage reduction in attention operations (targets ~65%)
+2. **Average Token Ratio**: Mean token ratio across all test samples
+3. **FLOP Reduction**: Percentage reduction in attention MACs
+   - Computed as: (1 - actual_MACs / dense_MACs) × 100%
 4. **Per-graph statistics**: 
    - Number of nodes, edges, density
    - Average degree, degree variance
-   - Token ratio per graph
-   - Layer gates (per-layer survival probabilities)
+   - Token ratio per graph (correlate with size)
+   - Layer gate values (per-layer survival probabilities)
 
 ### Cross-Validation Strategy
 
@@ -273,8 +304,12 @@ For each fold:
 | epochs | 100 | Training iterations per fold |
 | batch_size | 4 | Samples per batch |
 | learning_rate | 0.001 | Initial learning rate |
-| lambda_compute | 0.10 | Efficiency loss weight |
-| lambda_ratio | 0.0 | Per-layer variance penalty (disabled) |
+| lambda_compute | 0.5 | Compute-cost penalty weight |
+| lambda_ratio | 0.1 | Target-ratio regularizer weight |
+| target_ratio | 0.7 | Desired average token keep-ratio |
+| tau_start | 2.0 | Initial Gumbel temperature |
+| tau_end | 0.5 | Final Gumbel temperature |
+| max_k | 512 | Hard cap on tokens to prevent OOM |
 
 ### Evaluation
 | Parameter | Value | Description |
@@ -340,6 +375,59 @@ Empirically: 67.9% ± 8.1% FLOP reduction achieved with this range.
 - ✅ Simple integration with any GPS variant
 - ✅ Modular design for future improvements
 - ✅ Easier to ablate and analyze contribution
+
+### Why Scale Attention Output by Token Ratio?
+
+**The Challenge:**
+- Token selection uses `ceil()` which kills gradients: `k_per_graph.ceil().long()`
+- Without a gradient path, task_loss cannot influence BudgetNet's token_ratio predictions
+- Result: BudgetNet learns to optimize only via structural features, losing task-specific signal
+
+**The Solution:**
+```python
+# Scale attention output by token_ratio for gradient coupling
+if token_ratio is not None:
+    ratio_weight = token_ratio[batch].unsqueeze(-1)  # [N_total, 1]
+    h = h * ratio_weight
+```
+
+**How it works:**
+- Graph that needs more tokens for correct classification: task_loss pushes token_ratio UP
+- Graph that can be classified with few tokens: task_loss can tolerate lower token_ratio
+- Creates bidirectional information flow: task loss → BudgetNet predictions → better selectivity
+
+**Empirical consequence:** Without this coupling, most graphs converge to average token_ratio (~60%). With coupling, BudgetNet learns size-dependent predictions (ρ = -0.637 with graph size).
+
+---
+
+## Per-Graph Token Budget Enforcement
+
+After computing token_ratios from BudgetNet, each graph's budget is physically enforced:
+
+```python
+# Number of real nodes per graph
+real_lengths = mask.sum(dim=1)  # [B]
+k_per_graph = (token_ratio * real_lengths.float()).ceil().long()
+
+# Hard caps:
+# 1. Never exceed max_k (prevent OOM on RTX 3050, etc.)
+# 2. Never exceed actual number of nodes in graph
+# 3. Minimum of 1 token (must keep at least something)
+k_per_graph = k_per_graph.clamp(min=1, max=self.max_k)
+k_per_graph = torch.where(k_per_graph > real_lengths, real_lengths, k_per_graph)
+
+# Batch-level k for uniform attention shape (conservative: use max)
+k_max = int(k_per_graph.max().item())
+
+# Gumbel top-k selection produces [B, L] mask with k_max ones per row
+# Then refine: zero out positions > k_i for each graph i individually
+for i in range(B):
+    ki = int(k_per_graph[i].item())
+    if ki < k_max:
+        sorted_mask[i, ki:] = 0.0
+```
+
+This ensures **each graph respects its computed budget**, not just the batch maximum.
 
 ---
 
