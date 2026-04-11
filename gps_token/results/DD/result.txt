@@ -1,0 +1,181 @@
+  Fold 2 | Epoch 070 | Loss 0.2229 | Val 0.7692 | Test 0.7203 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 2 | Epoch 080 | Loss 0.1646 | Val 0.6752 | Test 0.6780 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 2 | Epoch 090 | Loss 0.1539 | Val 0.7521 | Test 0.6949 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 2 | Epoch 100 | Loss 0.1326 | Val 0.6838 | Test 0.6102 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 1: Best Val Acc: 0.8205, Test Acc: 0.6864, Token Ratio: 0.470, FLOP Red: 77.9%
+
+============================================================
+Fold 3/10
+============================================================
+
+============================================================
+  FOLD 3 / 10
+  Train size: 943 (80%), Val size: 117 (10%), Test size: 118 (10%)
+============================================================
+  Fold 3 | Epoch 001 | Loss 5.1269 | Val 0.6667 | Test 0.6356 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 3 | Epoch 010 | Loss 0.4976 | Val 0.7521 | Test 0.7712 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 3 | Epoch 020 | Loss 0.4369 | Val 0.7521 | Test 0.6271 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 3 | Epoch 030 | Loss 0.4207 | Val 0.4103 | Test 0.4407 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 3 | Epoch 040 | Loss 0.3761 | Val 0.7863 | Test 0.7119 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 3 | Epoch 050 | Loss 0.3234 | Val 0.6667 | Test 0.6780 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 3 | Epoch 060 | Loss 0.2455 | Val 0.8034 | Test 0.7458 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 3 | Epoch 070 | Loss 0.2292 | Val 0.7607 | Test 0.7881 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 3 | Epoch 080 | Loss 0.2109 | Val 0.7607 | Test 0.7627 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 3 | Epoch 090 | Loss 0.2062 | Val 0.7094 | Test 0.6864 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 3 | Epoch 100 | Loss 0.1851 | Val 0.7009 | Test 0.7373 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 2: Best Val Acc: 0.8291, Test Acc: 0.7627, Token Ratio: 0.470, FLOP Red: 77.9%
+
+============================================================
+Fold 4/10
+============================================================
+
+============================================================
+  FOLD 4 / 10
+  Train size: 943 (80%), Val size: 117 (10%), Test size: 118 (10%)
+============================================================
+  Fold 4 | Epoch 001 | Loss 5.9859 | Val 0.6068 | Test 0.6102 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 4 | Epoch 010 | Loss 0.5396 | Val 0.5897 | Test 0.6017 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 4 | Epoch 020 | Loss 0.4543 | Val 0.7607 | Test 0.8051 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 4 | Epoch 030 | Loss 0.4175 | Val 0.5043 | Test 0.5678 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 4 | Epoch 040 | Loss 0.3612 | Val 0.6239 | Test 0.6356 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 4 | Epoch 050 | Loss 0.2758 | Val 0.8291 | Test 0.8136 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 4 | Epoch 060 | Loss 0.2514 | Val 0.7949 | Test 0.7542 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 4 | Epoch 070 | Loss 0.2076 | Val 0.8034 | Test 0.7627 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 4 | Epoch 080 | Loss 0.2128 | Val 0.5897 | Test 0.6356 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 4 | Epoch 090 | Loss 0.2193 | Val 0.7607 | Test 0.7119 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 4 | Epoch 100 | Loss 0.1791 | Val 0.7265 | Test 0.7627 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 3: Best Val Acc: 0.8205, Test Acc: 0.7966, Token Ratio: 0.470, FLOP Red: 77.9%
+
+============================================================
+Fold 5/10
+============================================================
+
+============================================================
+  FOLD 5 / 10
+  Train size: 943 (80%), Val size: 117 (10%), Test size: 118 (10%)
+============================================================
+  Fold 5 | Epoch 001 | Loss 5.7081 | Val 0.6325 | Test 0.6695 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 5 | Epoch 010 | Loss 0.5422 | Val 0.7094 | Test 0.7288 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 5 | Epoch 020 | Loss 0.4491 | Val 0.7094 | Test 0.7373 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 5 | Epoch 030 | Loss 0.4101 | Val 0.7094 | Test 0.8051 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 5 | Epoch 040 | Loss 0.3854 | Val 0.6838 | Test 0.7627 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 5 | Epoch 050 | Loss 0.3216 | Val 0.6838 | Test 0.7966 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 5 | Epoch 060 | Loss 0.2528 | Val 0.6752 | Test 0.7712 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 5 | Epoch 070 | Loss 0.2164 | Val 0.6068 | Test 0.7034 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 5 | Epoch 080 | Loss 0.2328 | Val 0.5726 | Test 0.6780 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 5 | Epoch 090 | Loss 0.1944 | Val 0.6667 | Test 0.7712 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 5 | Epoch 100 | Loss 0.1703 | Val 0.7009 | Test 0.7966 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 4: Best Val Acc: 0.7265, Test Acc: 0.7881, Token Ratio: 0.470, FLOP Red: 77.9%
+
+============================================================
+Fold 6/10
+============================================================
+
+============================================================
+  FOLD 6 / 10
+  Train size: 943 (80%), Val size: 117 (10%), Test size: 118 (10%)
+============================================================
+  Fold 6 | Epoch 001 | Loss 4.6241 | Val 0.5043 | Test 0.4661 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 6 | Epoch 010 | Loss 0.5130 | Val 0.6667 | Test 0.7119 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 6 | Epoch 020 | Loss 0.4752 | Val 0.7949 | Test 0.8051 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 6 | Epoch 030 | Loss 0.5020 | Val 0.6838 | Test 0.7034 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 6 | Epoch 040 | Loss 0.5522 | Val 0.6154 | Test 0.6356 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 6 | Epoch 050 | Loss 0.5889 | Val 0.5043 | Test 0.5763 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 6 | Epoch 060 | Loss 0.5679 | Val 0.8120 | Test 0.7712 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 6 | Epoch 070 | Loss 0.5441 | Val 0.7863 | Test 0.7881 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 6 | Epoch 080 | Loss 0.5413 | Val 0.8034 | Test 0.7881 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 6 | Epoch 090 | Loss 0.5638 | Val 0.7949 | Test 0.7119 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 6 | Epoch 100 | Loss 0.5564 | Val 0.5556 | Test 0.5254 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 5: Best Val Acc: 0.8205, Test Acc: 0.7627, Token Ratio: 0.470, FLOP Red: 77.9%
+
+============================================================
+Fold 7/10
+============================================================
+
+============================================================
+  FOLD 7 / 10
+  Train size: 943 (80%), Val size: 117 (10%), Test size: 118 (10%)
+============================================================
+  Fold 7 | Epoch 001 | Loss 5.1816 | Val 0.4359 | Test 0.4068 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 7 | Epoch 010 | Loss 0.5383 | Val 0.6923 | Test 0.8136 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 7 | Epoch 020 | Loss 0.4811 | Val 0.6838 | Test 0.8220 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 7 | Epoch 030 | Loss 0.5275 | Val 0.7521 | Test 0.8729 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 7 | Epoch 040 | Loss 0.4036 | Val 0.7179 | Test 0.7458 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 7 | Epoch 050 | Loss 0.3464 | Val 0.7863 | Test 0.7881 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 7 | Epoch 060 | Loss 0.2915 | Val 0.6923 | Test 0.7966 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 7 | Epoch 070 | Loss 0.2762 | Val 0.7179 | Test 0.7373 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 7 | Epoch 080 | Loss 0.2159 | Val 0.7350 | Test 0.8136 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 7 | Epoch 030 | Loss 0.5275 | Val 0.7521 | Test 0.8729 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 7 | Epoch 040 | Loss 0.4036 | Val 0.7179 | Test 0.7458 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 7 | Epoch 050 | Loss 0.3464 | Val 0.7863 | Test 0.7881 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 7 | Epoch 050 | Loss 0.3464 | Val 0.7863 | Test 0.7881 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 7 | Epoch 060 | Loss 0.2915 | Val 0.6923 | Test 0.7966 | token_ratio 0.470 | FLOP_red 77.9%
+Fold 8/10
+============================================================
+
+============================================================
+  FOLD 8 / 10
+  Train size: 943 (80%), Val size: 117 (10%), Test size: 118 (10%)
+============================================================
+  Fold 8 | Epoch 001 | Loss 5.8078 | Val 0.6667 | Test 0.6102 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 8 | Epoch 010 | Loss 0.5244 | Val 0.7607 | Test 0.7373 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 8 | Epoch 020 | Loss 0.4478 | Val 0.7265 | Test 0.7288 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 8 | Epoch 030 | Loss 0.4166 | Val 0.7265 | Test 0.7627 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 8 | Epoch 040 | Loss 0.4166 | Val 0.7607 | Test 0.7373 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 8 | Epoch 050 | Loss 0.3332 | Val 0.6325 | Test 0.6102 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 8 | Epoch 060 | Loss 0.2725 | Val 0.6239 | Test 0.6186 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 8 | Epoch 070 | Loss 0.2445 | Val 0.7692 | Test 0.7288 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 8 | Epoch 080 | Loss 0.2639 | Val 0.7778 | Test 0.7373 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 8 | Epoch 090 | Loss 0.2049 | Val 0.6325 | Test 0.6949 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 8 | Epoch 100 | Loss 0.1913 | Val 0.7436 | Test 0.7712 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 7: Best Val Acc: 0.7778, Test Acc: 0.7373, Token Ratio: 0.470, FLOP Red: 77.9%
+
+============================================================
+Fold 9/10
+============================================================
+
+============================================================
+  FOLD 9 / 10
+  Train size: 944 (80%), Val size: 117 (10%), Test size: 117 (10%)
+============================================================
+  Fold 9 | Epoch 001 | Loss 6.0819 | Val 0.6496 | Test 0.6667 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 9 | Epoch 010 | Loss 0.5189 | Val 0.7265 | Test 0.7009 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 9 | Epoch 020 | Loss 0.4708 | Val 0.7009 | Test 0.7265 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 9 | Epoch 030 | Loss 0.4647 | Val 0.7778 | Test 0.7607 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 9 | Epoch 040 | Loss 0.3983 | Val 0.7607 | Test 0.7521 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 9 | Epoch 050 | Loss 0.3718 | Val 0.6410 | Test 0.6154 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 9 | Epoch 060 | Loss 0.3136 | Val 0.5385 | Test 0.5812 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 9 | Epoch 070 | Loss 0.2428 | Val 0.7350 | Test 0.7094 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 9 | Epoch 080 | Loss 0.1800 | Val 0.6667 | Test 0.6667 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 9 | Epoch 090 | Loss 0.1782 | Val 0.7265 | Test 0.7521 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 9 | Epoch 100 | Loss 0.1662 | Val 0.6923 | Test 0.7009 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 8: Best Val Acc: 0.8034, Test Acc: 0.7265, Token Ratio: 0.470, FLOP Red: 77.9%
+
+============================================================
+Fold 10/10
+============================================================
+
+============================================================
+  FOLD 10 / 10
+  Train size: 944 (80%), Val size: 117 (10%), Test size: 117 (10%)
+============================================================
+  Fold 10 | Epoch 001 | Loss 5.2794 | Val 0.6325 | Test 0.5641 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 10 | Epoch 010 | Loss 0.5395 | Val 0.7265 | Test 0.7265 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 10 | Epoch 020 | Loss 0.4885 | Val 0.3761 | Test 0.4103 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 10 | Epoch 030 | Loss 0.4633 | Val 0.7350 | Test 0.7521 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 10 | Epoch 040 | Loss 0.4249 | Val 0.3761 | Test 0.4103 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 10 | Epoch 050 | Loss 0.3374 | Val 0.7350 | Test 0.7009 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 10 | Epoch 060 | Loss 0.2639 | Val 0.8205 | Test 0.6838 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 10 | Epoch 070 | Loss 0.2340 | Val 0.6752 | Test 0.7094 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 10 | Epoch 080 | Loss 0.2248 | Val 0.7094 | Test 0.7094 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 10 | Epoch 090 | Loss 0.1966 | Val 0.6923 | Test 0.7350 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 10 | Epoch 100 | Loss 0.1550 | Val 0.6667 | Test 0.7009 | token_ratio 0.470 | FLOP_red 77.9%
+  Fold 9: Best Val Acc: 0.8120, Test Acc: 0.7436, Token Ratio: 0.470, FLOP Red: 77.9%
+
+============================================================
+Cross-Validation Summary
+============================================================
+Mean Test Accuracy: 0.7428 ± 0.0352
+Range: 0.6864 - 0.7966
+Token Ratio: 0.4700 ± 0.0000
+Est. FLOP Reduction: 77.9% ± 0.0%

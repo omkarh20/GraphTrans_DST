@@ -1,0 +1,2 @@
+Method,token_ratio,n_folds,val_mean,val_std,test_mean,test_std
+gnn,0.47,10,0.7940,0.0325,0.7428,0.0352
