@@ -319,17 +319,17 @@ for fold_idx, (train_indices, test_indices) in enumerate(skf.split(np.zeros(len(
     fold_dir = os.path.join(args.save_path, f'fold_{fold_idx}')
     os.makedirs(fold_dir, exist_ok=True)
     
-    print(f"\n{'='*60}")
-    print(f"  FOLD {fold_idx + 1} / {args.n_folds}")
-    print(f"  Train size: {len(train_indices)} (80%), Val size: {len(val_indices)} (10%), Test size: {len(test_indices)} (10%)")
-    print(f"{'='*60}")
-    
     # Sub-split training data into train/val (80/10 of training data, remaining 10 is external test from k-fold)
     train_indices = train_indices.copy()
     np.random.shuffle(train_indices)
     val_split = int(len(train_indices) / 9)  # 1/9 = 10% of training data for validation
     val_indices = train_indices[:val_split]
     train_indices = train_indices[val_split:]
+    
+    print(f"\n{'='*60}")
+    print(f"  FOLD {fold_idx + 1} / {args.n_folds}")
+    print(f"  Train size: {len(train_indices)} (80%), Val size: {len(val_indices)} (10%), Test size: {len(test_indices)} (10%)")
+    print(f"{'='*60}")
     
     # Create datasets and loaders for this fold
     train_set = Subset(full_dataset, train_indices)
