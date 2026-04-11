@@ -16,10 +16,13 @@ from torch.utils.data import random_split
 import random
 import numpy as np
 import configargparse
+import csv
 
 import torch.nn.functional as F
+from sklearn.model_selection import StratifiedKFold
+from torch.utils.data import Subset
 
-from utils import results_to_file
+from utils import results_to_file, results_cv_to_file
 
 
 
@@ -96,6 +99,10 @@ def gene_arg():
     group.add_argument('--seed', type=int, default=12344)
     group.add_argument('--token_ratio', type=float, default=0.5)
 
+    group = parser.add_argument_group('cross-validation')
+    group.add_argument('--n_folds', type=int, default=10,
+                        help='Number of CV folds (default: 10, use 3 for debugging)')
+
     # fmt: on
 
     args, _ = parser.parse_known_args()
@@ -126,8 +133,8 @@ class NormalizedDegree(object):
         return data
 
 
-def load_data(args, transform):
-
+def load_dataset(args, transform):
+    """Load full dataset without splitting."""
     data_name = args.dataset + '-pe'
     dataset = TUDataset(os.path.join(args.data_root, data_name),
                         name=args.dataset,
@@ -147,22 +154,26 @@ def load_data(args, transform):
             mean, std = deg.mean().item(), deg.std().item()
             dataset.transform = NormalizedDegree(mean, std)
 
-    num_tasks = dataset.num_classes
-    num_features = dataset.num_features
-    num_training = int(len(dataset) * 0.8)
-    num_val = int(len(dataset) * 0.1)
-    num_test = len(dataset) - (num_training + num_val)
-    training_set, validation_set, test_set = random_split(dataset, [num_training, num_val, num_test])
+    return dataset
 
-    train_loader = DataLoader(training_set, batch_size=args.batch_size, shuffle=True)
-    val_loader   = DataLoader(validation_set, batch_size=args.eval_batch_size)
-    test_loader  = DataLoader(test_set, batch_size=args.eval_batch_size)
 
-    return train_loader, val_loader, test_loader, num_tasks, num_features
+def get_labels(dataset):
+    """Extract integer labels from dataset for stratified splitting."""
+    labels = []
+    for data in dataset:
+        labels.append(int(data.y.item()))
+    return np.array(labels)
 
-train_loader, val_loader, test_loader, num_tasks, num_features = load_data(args, transform)
 
-#raise Exception("pause!")
+# Load full dataset for k-fold cross-validation
+full_dataset = load_dataset(args, transform)
+num_tasks = full_dataset.num_classes
+num_features = full_dataset.num_features
+labels = get_labels(full_dataset)
+
+# Prepare cross-validation splits
+skf = StratifiedKFold(n_splits=args.n_folds, shuffle=True, random_state=args.seed)
+fold_results = []
 
 
 
@@ -199,23 +210,16 @@ class GPS(torch.nn.Module):
         return self.lin(x)
 
 
-device = torch.device('cuda:{}'.format(args.devices) if torch.cuda.is_available() else 'cpu')
-model = GPS(fea_dim=num_features, channels=64, num_layers=args.num_layers, num_tasks = num_tasks, args =args).to(device)
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
-
-
-def train(epoch):
+def train(epoch, model, train_loader, optimizer, device):
+    """Training function (redefined per fold)."""
     model.train()
 
     total_loss = 0
     for data in train_loader:
         data = data.to(device)
         optimizer.zero_grad()
-        #print(data.x.size(), data.pe.size())
-        out = model(data.x, data.pe, data.edge_index, data.edge_attr,
-                    data.batch)
+        out = model(data.x, data.pe, data.edge_index, data.edge_attr, data.batch)
         loss = F.cross_entropy(out, data.y)
-        #loss = (out.squeeze() - data.y).abs().mean()
         loss.backward()
 
         total_loss += loss.item() * data.num_graphs
@@ -224,46 +228,112 @@ def train(epoch):
 
 
 @torch.no_grad()
-def test(loader):
+def test(loader, model, device):
+    """Testing function (redefined per fold)."""
     model.eval()
 
     correct = 0
     for data in loader:
         data = data.to(device)
-        out = model(data.x, data.pe, data.edge_index, data.edge_attr,
-                    data.batch)
+        out = model(data.x, data.pe, data.edge_index, data.edge_attr, data.batch)
         out = out.max(dim=1)[1]
         correct += out.eq(data.y).sum().item()
-        #total_error += (out.squeeze() - data.y).abs().sum().item()
     return correct / len(loader.dataset)
 
 
-run_name = f"{args.dataset}"
+device = torch.device('cuda:{}'.format(args.devices) if torch.cuda.is_available() else 'cpu')
+
+run_name = f"{args.dataset}_cv{args.n_folds}"
 args.save_path = f"exps/{run_name}-{now}"
-os.makedirs(os.path.join(args.save_path, str(args.seed)), exist_ok=True)
+os.makedirs(args.save_path, exist_ok=True)
 
+# =====================================================================
+# K-Fold Cross-Validation Loop
+# =====================================================================
+for fold_idx, (train_indices, test_indices) in enumerate(skf.split(np.zeros(len(full_dataset)), labels)):
+    print(f"\n{'='*60}")
+    print(f"Fold {fold_idx + 1}/{args.n_folds}")
+    print(f"{'='*60}")
+    
+    # Create fold directory
+    fold_dir = os.path.join(args.save_path, f'fold_{fold_idx}')
+    os.makedirs(fold_dir, exist_ok=True)
+    
+    # Sub-split training data into train/val (80/10 of training data, remaining 10 is external test from k-fold)
+    train_indices = train_indices.copy()
+    np.random.shuffle(train_indices)
+    val_split = int(len(train_indices) / 9)  # 1/9 = 10% of training data for validation
+    val_indices = train_indices[:val_split]
+    train_indices = train_indices[val_split:]
+    
+    # Create datasets and loaders for this fold
+    train_set = Subset(full_dataset, train_indices)
+    val_set = Subset(full_dataset, val_indices)
+    test_set = Subset(full_dataset, test_indices)
+    
+    train_loader = DataLoader(train_set, batch_size=args.batch_size, shuffle=True)
+    val_loader = DataLoader(val_set, batch_size=args.eval_batch_size)
+    test_loader = DataLoader(test_set, batch_size=args.eval_batch_size)
+    
+    # Reinitialize model and optimizer for this fold
+    model = GPS(fea_dim=num_features, channels=64, num_layers=args.num_layers, num_tasks=num_tasks, args=args).to(device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-5)
+    
+    # Training loop for this fold (original logic preserved)
+    best_val = 0
+    epoch_log = []
+    
+    for epoch in range(1, args.epochs + 1):
+        loss = train(epoch, model, train_loader, optimizer, device)
+        val_acc = test(val_loader, model, device)
+        test_acc = test(test_loader, model, device)
+        state_dict = {"model": model.state_dict(), "optimizer": optimizer.state_dict(), "epoch": epoch}
+        
+        # Log epoch results
+        epoch_log.append({
+            'epoch': epoch,
+            'loss': loss,
+            'val_acc': val_acc,
+            'test_acc': test_acc
+        })
+        
+        if best_val < val_acc:
+            best_val = val_acc
+            torch.save(state_dict, os.path.join(fold_dir, "best_model.pt"))
+        
+        if epoch % 10 == 0 or epoch == 1:
+            print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Val: {val_acc:.4f}, Test: {test_acc:.4f}')
+    
+    # Load best model and evaluate on test set
+    state_dict = torch.load(os.path.join(fold_dir, "best_model.pt"))
+    model.load_state_dict(state_dict["model"])
+    best_val_acc = test(val_loader, model, device)
+    best_test_acc = test(test_loader, model, device)
+    
+    # Save epoch log for this fold
+    epoch_log_path = os.path.join(fold_dir, "epoch_log.csv")
+    with open(epoch_log_path, 'w', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=['epoch', 'loss', 'val_acc', 'test_acc'])
+        writer.writeheader()
+        writer.writerows(epoch_log)
+    
+    fold_results.append({
+        'fold': fold_idx,
+        'val_acc': best_val_acc,
+        'test_acc': best_test_acc
+    })
+    
+    print(f'Fold {fold_idx}: Best Val Acc: {best_val_acc:.4f}, Test Acc: {best_test_acc:.4f}')
 
-best_val, final_test = 0, 0
-for epoch in range(1, args.epochs+1):
-    loss = train(epoch)
-    val_acc = test(val_loader)
-    test_acc = test(test_loader)
-    state_dict = {"model": model.state_dict(), "optimizer": optimizer.state_dict(), "epoch": epoch}
+# =====================================================================
+# Summary
+# =====================================================================
+print(f"\n{'='*60}")
+print("Cross-Validation Summary")
+print(f"{'='*60}")
 
-    if best_val < val_acc:
-        best_val = val_acc
-        #final_test = test_acc
-        torch.save(state_dict, os.path.join(args.save_path, str(args.seed), "best_model.pt"))
+test_accs = [r['test_acc'] for r in fold_results]
+print(f"Mean Test Accuracy: {np.mean(test_accs):.4f} ± {np.std(test_accs):.4f}")
+print(f"Range: {np.min(test_accs):.4f} - {np.max(test_accs):.4f}")
 
-    print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Val: {val_acc:.4f}, '
-          f'Test: {test_acc:.4f}')
-
-
-## load
-state_dict = torch.load(os.path.join(args.save_path, str(args.seed), "best_model.pt"))
-model.load_state_dict(state_dict["model"])
-best_val_acc = test(val_loader)
-best_test_acc = test(test_loader)
-
-
-results_to_file(args, best_test_acc, best_val_acc)
+results_cv_to_file(args, fold_results)
