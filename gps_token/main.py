@@ -228,17 +228,77 @@ def train(epoch, model, train_loader, optimizer, device):
 
 
 @torch.no_grad()
-def test(loader, model, device):
-    """Testing function (redefined per fold)."""
+def test(loader, model, device, return_details=False):
+    """Testing function with optional per-graph details (redefined per fold)."""
     model.eval()
 
     correct = 0
+    details = []
+    total_n_tokens = 0
+    total_nodes = 0
+    
     for data in loader:
         data = data.to(device)
         out = model(data.x, data.pe, data.edge_index, data.edge_attr, data.batch)
-        out = out.max(dim=1)[1]
-        correct += out.eq(data.y).sum().item()
-    return correct / len(loader.dataset)
+        true_labels = data.y.cpu().numpy()
+        pred_labels = out.max(dim=1)[1].cpu().numpy()
+        correct += (true_labels == pred_labels).sum().item()
+        
+        # Compute graph stats per example in batch
+        batch_cpu = data.batch.cpu().numpy()
+        nodes_per_graph = np.bincount(batch_cpu)
+        edge_index_cpu = data.edge_index.cpu()
+        edges_per_graph = np.zeros(len(nodes_per_graph))
+        
+        for edge_idx in range(edge_index_cpu.shape[1]):
+            src, dst = edge_index_cpu[0, edge_idx].item(), edge_index_cpu[1, edge_idx].item()
+            g_id = batch_cpu[src]
+            edges_per_graph[g_id] += 1
+        
+        edges_per_graph = edges_per_graph / 2.0  # undirected edges
+        
+        # Compute degree stats per graph
+        from torch_geometric.utils import degree as compute_degree
+        deg = compute_degree(edge_index_cpu[0], num_nodes=data.x.size(0)).cpu().numpy()
+        
+        deg_per_graph_mean = np.zeros(len(nodes_per_graph))
+        deg_per_graph_var = np.zeros(len(nodes_per_graph))
+        for g_id in range(len(nodes_per_graph)):
+            mask = (batch_cpu == g_id)
+            if mask.sum() > 0:
+                g_degs = deg[mask]
+                deg_per_graph_mean[g_id] = float(g_degs.mean())
+                deg_per_graph_var[g_id] = float(g_degs.var()) if len(g_degs) > 1 else 0.0
+        
+        # Token efficiency: static ratio for all graphs
+        for i in range(len(true_labels)):
+            num_n = int(nodes_per_graph[i])
+            num_e = int(edges_per_graph[i])
+            density = (2.0 * num_e) / (num_n * (num_n - 1) + 1e-8) if num_n > 1 else 0.0
+            total_nodes += num_n
+            total_n_tokens += int(num_n * args.token_ratio)
+            
+            if return_details:
+                details.append({
+                    "num_nodes":       int(num_n),
+                    "num_edges":       int(num_e),
+                    "density":         float(density),
+                    "avg_degree":      float(deg_per_graph_mean[i]),
+                    "degree_variance": float(deg_per_graph_var[i]),
+                    "true_label":      int(true_labels[i]),
+                    "pred_label":      int(pred_labels[i]),
+                    "token_ratio":     float(args.token_ratio),
+                    "correct":         int(true_labels[i] == pred_labels[i]),
+                })
+    
+    acc = correct / len(loader.dataset)
+    avg_token_ratio = args.token_ratio
+    # Estimate FLOP reduction assuming quadratic attention: pruning from k to k*r reduces FLOPs by ~1 - r²
+    flop_reduction = 1.0 - (args.token_ratio ** 2)
+    
+    if return_details:
+        return acc, avg_token_ratio, flop_reduction, details
+    return acc, avg_token_ratio, flop_reduction
 
 
 device = torch.device('cuda:{}'.format(args.devices) if torch.cuda.is_available() else 'cpu')
@@ -258,6 +318,11 @@ for fold_idx, (train_indices, test_indices) in enumerate(skf.split(np.zeros(len(
     # Create fold directory
     fold_dir = os.path.join(args.save_path, f'fold_{fold_idx}')
     os.makedirs(fold_dir, exist_ok=True)
+    
+    print(f"\n{'='*60}")
+    print(f"  FOLD {fold_idx + 1} / {args.n_folds}")
+    print(f"  Train size: {len(train_indices)} (80%), Val size: {len(val_indices)} (10%), Test size: {len(test_indices)} (10%)")
+    print(f"{'='*60}")
     
     # Sub-split training data into train/val (80/10 of training data, remaining 10 is external test from k-fold)
     train_indices = train_indices.copy()
@@ -285,45 +350,59 @@ for fold_idx, (train_indices, test_indices) in enumerate(skf.split(np.zeros(len(
     
     for epoch in range(1, args.epochs + 1):
         loss = train(epoch, model, train_loader, optimizer, device)
-        val_acc = test(val_loader, model, device)
-        test_acc = test(test_loader, model, device)
+        val_acc, val_ratio, val_flop_red = test(val_loader, model, device)
+        test_acc, test_ratio, test_flop_red = test(test_loader, model, device)
         state_dict = {"model": model.state_dict(), "optimizer": optimizer.state_dict(), "epoch": epoch}
         
         # Log epoch results
         epoch_log.append({
             'epoch': epoch,
-            'loss': loss,
-            'val_acc': val_acc,
-            'test_acc': test_acc
+            'loss': f"{loss:.6f}",
+            'val_acc': f"{val_acc:.4f}",
+            'test_acc': f"{test_acc:.4f}",
+            'avg_token_ratio': f"{val_ratio:.4f}",
+            'flop_reduction': f"{val_flop_red:.4f}",
         })
         
         if best_val < val_acc:
             best_val = val_acc
             torch.save(state_dict, os.path.join(fold_dir, "best_model.pt"))
         
-        if epoch % 10 == 0 or epoch == 1:
-            print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}, Val: {val_acc:.4f}, Test: {test_acc:.4f}')
+        if epoch % 10 == 0 or epoch == 1 or epoch == args.epochs:
+            print(f'  Fold {fold_idx+1} | Epoch {epoch:03d} | Loss {loss:.4f} | '
+                  f'Val {val_acc:.4f} | Test {test_acc:.4f} | '
+                  f'token_ratio {val_ratio:.3f} | FLOP_red {val_flop_red:.1%}')
     
     # Load best model and evaluate on test set
     state_dict = torch.load(os.path.join(fold_dir, "best_model.pt"))
     model.load_state_dict(state_dict["model"])
-    best_val_acc = test(val_loader, model, device)
-    best_test_acc = test(test_loader, model, device)
+    best_val_acc, best_val_ratio, best_val_flop = test(val_loader, model, device)
+    best_test_acc, best_test_ratio, best_test_flop, test_details = test(test_loader, model, device, return_details=True)
     
     # Save epoch log for this fold
     epoch_log_path = os.path.join(fold_dir, "epoch_log.csv")
     with open(epoch_log_path, 'w', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=['epoch', 'loss', 'val_acc', 'test_acc'])
+        writer = csv.DictWriter(f, fieldnames=['epoch', 'loss', 'val_acc', 'test_acc', 'avg_token_ratio', 'flop_reduction'])
         writer.writeheader()
         writer.writerows(epoch_log)
+    
+    # Save per-graph details for this fold
+    if test_details:
+        details_path = os.path.join(fold_dir, "test_graph_details.csv")
+        with open(details_path, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=test_details[0].keys())
+            writer.writeheader()
+            writer.writerows(test_details)
     
     fold_results.append({
         'fold': fold_idx,
         'val_acc': best_val_acc,
-        'test_acc': best_test_acc
+        'test_acc': best_test_acc,
+        'token_ratio': best_test_ratio,
+        'flop_reduction': best_test_flop
     })
     
-    print(f'Fold {fold_idx}: Best Val Acc: {best_val_acc:.4f}, Test Acc: {best_test_acc:.4f}')
+    print(f'  Fold {fold_idx}: Best Val Acc: {best_val_acc:.4f}, Test Acc: {best_test_acc:.4f}, Token Ratio: {best_test_ratio:.3f}, FLOP Red: {best_test_flop:.1%}')
 
 # =====================================================================
 # Summary
@@ -333,7 +412,12 @@ print("Cross-Validation Summary")
 print(f"{'='*60}")
 
 test_accs = [r['test_acc'] for r in fold_results]
+token_ratios = [r['token_ratio'] for r in fold_results]
+flop_reds = [r['flop_reduction'] for r in fold_results]
+
 print(f"Mean Test Accuracy: {np.mean(test_accs):.4f} ± {np.std(test_accs):.4f}")
 print(f"Range: {np.min(test_accs):.4f} - {np.max(test_accs):.4f}")
+print(f"Token Ratio: {np.mean(token_ratios):.4f} ± {np.std(token_ratios):.4f}")
+print(f"Est. FLOP Reduction: {np.mean(flop_reds):.1%} ± {np.std(flop_reds):.1%}")
 
 results_cv_to_file(args, fold_results)
