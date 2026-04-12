@@ -1,0 +1,11 @@
+Method,lambda_compute,n_folds,fold,val_acc,test_acc,avg_token_ratio,avg_head_gate,flop_reduction
+adaptive_gps_full,0.01,10,1,0.7778,0.7288,0.6289,0.5570,0.3071
+adaptive_gps_full,0.01,10,2,0.7778,0.6864,0.6330,0.5894,0.2691
+adaptive_gps_full,0.01,10,3,0.8291,0.7458,0.6336,0.5102,0.7895
+adaptive_gps_full,0.01,10,4,0.8205,0.8051,0.6353,0.5084,0.6879
+adaptive_gps_full,0.01,10,5,0.7949,0.7966,0.6338,0.6330,0.3445
+adaptive_gps_full,0.01,10,6,0.8547,0.7797,0.6317,0.6350,0.2597
+adaptive_gps_full,0.01,10,7,0.8120,0.8475,0.6324,0.5021,0.3158
+adaptive_gps_full,0.01,10,8,0.8120,0.7627,0.6318,0.5561,0.3526
+adaptive_gps_full,0.01,10,9,0.8034,0.7179,0.6325,0.6061,0.3635
+adaptive_gps_full,0.01,10,10,0.8291,0.7949,0.6312,0.6418,0.5431

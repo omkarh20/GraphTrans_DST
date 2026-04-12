@@ -1,0 +1,2 @@
+Method,lambda_compute,n_folds,val_mean,val_std,test_mean,test_std,ratio_mean,ratio_std,head_gate_mean,head_gate_std,flop_red_mean,flop_red_std
+adaptive_gps_full,0.01,10,0.8111,0.0228,0.7665,0.0453,0.6324,0.0017,0.5739,0.0522,0.4233,0.1757

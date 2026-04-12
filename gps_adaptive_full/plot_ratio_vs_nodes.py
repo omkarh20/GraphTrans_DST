@@ -14,7 +14,7 @@ import numpy as np
 from scipy.stats import spearmanr
 
 # ── Config ────────────────────────────────────────────────────────────────────
-csv_path = r"exps\DD_adaptive_full_cv10-04_03-21_06_08\fold_0\graph_stats.csv"
+csv_path = "exps/DD_adaptive_full_cv10-04_12-07_30_18/fold_0/graph_stats.csv"
 
 # ── Load ──────────────────────────────────────────────────────────────────────
 df = pd.read_csv(csv_path)
