@@ -1,0 +1,191 @@
+  Fold 1 | Epoch 030 | Loss 0.0815 (task 0.0725, comp 0.0383, ratio 0.0900) | Val 0.6239 | Test 0.6271 | tau 1.56 | avg_ratio 1.000 | FLOP_red -4.6%
+  Fold 1 | Epoch 040 | Loss 0.0736 (task 0.0646, comp 0.0515, ratio 0.0900) | Val 0.6667 | Test 0.7373 | tau 1.41 | avg_ratio 1.000 | FLOP_red -4.6%
+  Fold 1 | Epoch 050 | Loss 0.0666 (task 0.0576, comp 0.0741, ratio 0.0900) | Val 0.6752 | Test 0.6186 | tau 1.26 | avg_ratio 1.000 | FLOP_red -4.6%
+  Fold 1 | Epoch 060 | Loss 0.0526 (task 0.0436, comp 0.1000, ratio 0.0900) | Val 0.6923 | Test 0.6864 | tau 1.11 | avg_ratio 1.000 | FLOP_red -4.6%
+  Fold 1 | Epoch 070 | Loss 0.0478 (task 0.0388, comp 0.1112, ratio 0.0900) | Val 0.7607 | Test 0.7288 | tau 0.95 | avg_ratio 1.000 | FLOP_red -4.6%
+  Fold 1 | Epoch 080 | Loss 0.0328 (task 0.0238, comp 0.1194, ratio 0.0900) | Val 0.6496 | Test 0.6864 | tau 0.80 | avg_ratio 1.000 | FLOP_red -4.6%
+  Fold 1 | Epoch 090 | Loss 0.0320 (task 0.0230, comp 0.1322, ratio 0.0900) | Val 0.7607 | Test 0.6525 | tau 0.65 | avg_ratio 1.000 | FLOP_red -4.6%
+  Fold 1 | Epoch 100 | Loss 0.0386 (task 0.0296, comp 0.1379, ratio 0.0900) | Val 0.6838 | Test 0.7034 | tau 0.50 | avg_ratio 1.000 | FLOP_red -4.6%
+  Epoch log saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_0/epoch_log.csv
+  Fold 1 BEST => Val: 0.7863 | Test: 0.7119 | Avg Token Ratio: 1.000 | FLOP Reduction: -62.3%
+  Per-graph stats saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_0/graph_stats.csv
+
+============================================================
+  FOLD 2 / 10
+  Train size: 943 (80%), Val size: 117 (10%), Test size: 118 (10%)
+============================================================
+  Fold 2 | Epoch 001 | Loss 0.5008 (task 0.4918, comp 0.1034, ratio 0.0900) | Val 0.7350 | Test 0.6695 | tau 2.00 | avg_ratio 1.000 | FLOP_red -91.5%
+  Fold 2 | Epoch 010 | Loss 0.1478 (task 0.1388, comp 0.0202, ratio 0.0900) | Val 0.6068 | Test 0.7034 | tau 1.86 | avg_ratio 1.000 | FLOP_red -91.5%
+  Fold 2 | Epoch 020 | Loss 0.1068 (task 0.0978, comp 0.0239, ratio 0.0900) | Val 0.6838 | Test 0.6186 | tau 1.71 | avg_ratio 1.000 | FLOP_red -91.5%
+  Fold 2 | Epoch 030 | Loss 0.0892 (task 0.0802, comp 0.0452, ratio 0.0900) | Val 0.6154 | Test 0.6610 | tau 1.56 | avg_ratio 1.000 | FLOP_red -91.5%
+  Fold 2 | Epoch 040 | Loss 0.0780 (task 0.0690, comp 0.0665, ratio 0.0900) | Val 0.6325 | Test 0.7034 | tau 1.41 | avg_ratio 1.000 | FLOP_red -91.5%
+  Fold 2 | Epoch 050 | Loss 0.0678 (task 0.0588, comp 0.0796, ratio 0.0900) | Val 0.7521 | Test 0.7373 | tau 1.26 | avg_ratio 1.000 | FLOP_red -91.5%
+  Fold 2 | Epoch 060 | Loss 0.0581 (task 0.0491, comp 0.0939, ratio 0.0900) | Val 0.7778 | Test 0.7119 | tau 1.11 | avg_ratio 1.000 | FLOP_red -91.5%
+  Fold 2 | Epoch 070 | Loss 0.0499 (task 0.0409, comp 0.1100, ratio 0.0900) | Val 0.7521 | Test 0.6949 | tau 0.95 | avg_ratio 1.000 | FLOP_red -91.5%
+  Fold 2 | Epoch 080 | Loss 0.0491 (task 0.0401, comp 0.1247, ratio 0.0900) | Val 0.7179 | Test 0.6780 | tau 0.80 | avg_ratio 1.000 | FLOP_red -91.5%
+  Fold 2 | Epoch 090 | Loss 0.0402 (task 0.0312, comp 0.1249, ratio 0.0900) | Val 0.7009 | Test 0.6949 | tau 0.65 | avg_ratio 1.000 | FLOP_red -91.5%
+  Fold 2 | Epoch 100 | Loss 0.0391 (task 0.0301, comp 0.1315, ratio 0.0900) | Val 0.7521 | Test 0.6949 | tau 0.50 | avg_ratio 1.000 | FLOP_red -91.5%
+  Epoch log saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_1/epoch_log.csv
+  Fold 2 BEST => Val: 0.8034 | Test: 0.7373 | Avg Token Ratio: 1.000 | FLOP Reduction: -56.2%
+  Per-graph stats saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_1/graph_stats.csv
+
+============================================================
+  FOLD 3 / 10
+  Train size: 943 (80%), Val size: 117 (10%), Test size: 118 (10%)
+============================================================
+  Fold 3 | Epoch 001 | Loss 0.5213 (task 0.5123, comp 0.1303, ratio 0.0900) | Val 0.7607 | Test 0.7797 | tau 2.00 | avg_ratio 1.000 | FLOP_red -60.8%
+  Fold 3 | Epoch 010 | Loss 0.1217 (task 0.1127, comp 0.0234, ratio 0.0900) | Val 0.5470 | Test 0.5508 | tau 1.86 | avg_ratio 1.000 | FLOP_red -60.8%
+  Fold 3 | Epoch 020 | Loss 0.0996 (task 0.0906, comp 0.0249, ratio 0.0900) | Val 0.7692 | Test 0.7373 | tau 1.71 | avg_ratio 1.000 | FLOP_red -60.8%
+  Fold 3 | Epoch 030 | Loss 0.0924 (task 0.0834, comp 0.0430, ratio 0.0900) | Val 0.7350 | Test 0.7034 | tau 1.56 | avg_ratio 1.000 | FLOP_red -60.8%
+  Fold 3 | Epoch 040 | Loss 0.0756 (task 0.0666, comp 0.0619, ratio 0.0900) | Val 0.7692 | Test 0.7627 | tau 1.41 | avg_ratio 1.000 | FLOP_red -60.8%
+  Fold 3 | Epoch 050 | Loss 0.0632 (task 0.0542, comp 0.0761, ratio 0.0900) | Val 0.7692 | Test 0.7542 | tau 1.26 | avg_ratio 1.000 | FLOP_red -60.8%
+  Fold 3 | Epoch 060 | Loss 0.0531 (task 0.0441, comp 0.0872, ratio 0.0900) | Val 0.6752 | Test 0.6441 | tau 1.11 | avg_ratio 1.000 | FLOP_red -60.8%
+  Fold 3 | Epoch 070 | Loss 0.0529 (task 0.0439, comp 0.1110, ratio 0.0900) | Val 0.6923 | Test 0.7712 | tau 0.95 | avg_ratio 1.000 | FLOP_red -60.8%
+  Fold 3 | Epoch 080 | Loss 0.0478 (task 0.0388, comp 0.1123, ratio 0.0900) | Val 0.7778 | Test 0.7119 | tau 0.80 | avg_ratio 1.000 | FLOP_red -60.8%
+  Fold 3 | Epoch 090 | Loss 0.0370 (task 0.0280, comp 0.1329, ratio 0.0900) | Val 0.7350 | Test 0.7458 | tau 0.65 | avg_ratio 1.000 | FLOP_red -60.8%
+  Fold 3 | Epoch 100 | Loss 0.0435 (task 0.0345, comp 0.1258, ratio 0.0900) | Val 0.7521 | Test 0.7797 | tau 0.50 | avg_ratio 1.000 | FLOP_red -60.8%
+  Epoch log saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_2/epoch_log.csv
+  Fold 3 BEST => Val: 0.8120 | Test: 0.7542 | Avg Token Ratio: 1.000 | FLOP Reduction: 55.8%
+  Per-graph stats saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_2/graph_stats.csv
+
+============================================================
+  FOLD 4 / 10
+  Train size: 943 (80%), Val size: 117 (10%), Test size: 118 (10%)
+============================================================
+  Fold 4 | Epoch 001 | Loss 0.8187 (task 0.8097, comp 0.1166, ratio 0.0900) | Val 0.4530 | Test 0.4153 | tau 2.00 | avg_ratio 1.000 | FLOP_red 48.4%
+  Fold 4 | Epoch 010 | Loss 0.1645 (task 0.1555, comp 0.0257, ratio 0.0900) | Val 0.7692 | Test 0.7627 | tau 1.86 | avg_ratio 1.000 | FLOP_red 48.4%
+  Fold 4 | Epoch 020 | Loss 0.1092 (task 0.1002, comp 0.0228, ratio 0.0900) | Val 0.7692 | Test 0.7458 | tau 1.71 | avg_ratio 1.000 | FLOP_red 48.4%
+  Fold 4 | Epoch 030 | Loss 0.0903 (task 0.0813, comp 0.0372, ratio 0.0900) | Val 0.8291 | Test 0.8051 | tau 1.56 | avg_ratio 1.000 | FLOP_red 48.4%
+  Fold 4 | Epoch 040 | Loss 0.0804 (task 0.0714, comp 0.0547, ratio 0.0900) | Val 0.7265 | Test 0.7373 | tau 1.41 | avg_ratio 1.000 | FLOP_red 48.4%
+  Fold 4 | Epoch 050 | Loss 0.0727 (task 0.0637, comp 0.0857, ratio 0.0900) | Val 0.7179 | Test 0.7881 | tau 1.26 | avg_ratio 1.000 | FLOP_red 48.4%
+  Fold 4 | Epoch 060 | Loss 0.0548 (task 0.0458, comp 0.0949, ratio 0.0900) | Val 0.7607 | Test 0.8051 | tau 1.11 | avg_ratio 1.000 | FLOP_red 48.4%
+  Fold 4 | Epoch 070 | Loss 0.0503 (task 0.0413, comp 0.1084, ratio 0.0900) | Val 0.7521 | Test 0.7373 | tau 0.95 | avg_ratio 1.000 | FLOP_red 48.4%
+  Fold 4 | Epoch 080 | Loss 0.0454 (task 0.0364, comp 0.1208, ratio 0.0900) | Val 0.7436 | Test 0.7881 | tau 0.80 | avg_ratio 1.000 | FLOP_red 48.4%
+  Fold 4 | Epoch 090 | Loss 0.0458 (task 0.0368, comp 0.1246, ratio 0.0900) | Val 0.7692 | Test 0.7458 | tau 0.65 | avg_ratio 1.000 | FLOP_red 48.4%
+  Fold 4 | Epoch 100 | Loss 0.0414 (task 0.0324, comp 0.1332, ratio 0.0900) | Val 0.7350 | Test 0.7458 | tau 0.50 | avg_ratio 1.000 | FLOP_red 48.4%
+  Epoch log saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_3/epoch_log.csv
+  Fold 4 BEST => Val: 0.8376 | Test: 0.8136 | Avg Token Ratio: 1.000 | FLOP Reduction: 31.1%
+  Per-graph stats saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_3/graph_stats.csv
+
+============================================================
+  FOLD 5 / 10
+  Train size: 943 (80%), Val size: 117 (10%), Test size: 118 (10%)
+============================================================
+  Fold 5 | Epoch 001 | Loss 0.4030 (task 0.3940, comp 0.0668, ratio 0.0900) | Val 0.4615 | Test 0.4492 | tau 2.00 | avg_ratio 1.000 | FLOP_red -57.4%
+  Fold 5 | Epoch 010 | Loss 0.1294 (task 0.1204, comp 0.0157, ratio 0.0900) | Val 0.4615 | Test 0.5169 | tau 1.86 | avg_ratio 1.000 | FLOP_red -57.4%
+  Fold 5 | Epoch 020 | Loss 0.1043 (task 0.0953, comp 0.0201, ratio 0.0900) | Val 0.7436 | Test 0.7881 | tau 1.71 | avg_ratio 1.000 | FLOP_red -57.4%
+  Fold 5 | Epoch 030 | Loss 0.0923 (task 0.0833, comp 0.0391, ratio 0.0900) | Val 0.7692 | Test 0.7797 | tau 1.56 | avg_ratio 1.000 | FLOP_red -57.4%
+  Fold 5 | Epoch 040 | Loss 0.0788 (task 0.0698, comp 0.0554, ratio 0.0900) | Val 0.7265 | Test 0.8136 | tau 1.41 | avg_ratio 1.000 | FLOP_red -57.4%
+  Fold 5 | Epoch 050 | Loss 0.0671 (task 0.0581, comp 0.0792, ratio 0.0900) | Val 0.7009 | Test 0.7203 | tau 1.26 | avg_ratio 1.000 | FLOP_red -57.4%
+  Fold 5 | Epoch 060 | Loss 0.0594 (task 0.0504, comp 0.0836, ratio 0.0900) | Val 0.6838 | Test 0.7797 | tau 1.11 | avg_ratio 1.000 | FLOP_red -57.4%
+  Fold 5 | Epoch 070 | Loss 0.0540 (task 0.0450, comp 0.0990, ratio 0.0900) | Val 0.7094 | Test 0.7373 | tau 0.95 | avg_ratio 1.000 | FLOP_red -57.4%
+  Fold 5 | Epoch 080 | Loss 0.0531 (task 0.0441, comp 0.1084, ratio 0.0900) | Val 0.6923 | Test 0.7542 | tau 0.80 | avg_ratio 1.000 | FLOP_red -57.4%
+  Fold 5 | Epoch 090 | Loss 0.0409 (task 0.0319, comp 0.1222, ratio 0.0900) | Val 0.7179 | Test 0.7373 | tau 0.65 | avg_ratio 1.000 | FLOP_red -57.4%
+  Fold 5 | Epoch 100 | Loss 0.0460 (task 0.0370, comp 0.1277, ratio 0.0900) | Val 0.7094 | Test 0.7712 | tau 0.50 | avg_ratio 1.000 | FLOP_red -57.4%
+  Epoch log saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_4/epoch_log.csv
+  Fold 5 BEST => Val: 0.7949 | Test: 0.7797 | Avg Token Ratio: 1.000 | FLOP Reduction: -40.6%
+  Per-graph stats saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_4/graph_stats.csv
+
+============================================================
+  FOLD 6 / 10
+  Train size: 943 (80%), Val size: 117 (10%), Test size: 118 (10%)
+============================================================
+  Fold 6 | Epoch 001 | Loss 0.4969 (task 0.4879, comp 0.0855, ratio 0.0900) | Val 0.6923 | Test 0.6695 | tau 2.00 | avg_ratio 1.000 | FLOP_red -89.6%
+  Fold 6 | Epoch 010 | Loss 0.1171 (task 0.1081, comp 0.0182, ratio 0.0900) | Val 0.7863 | Test 0.7542 | tau 1.86 | avg_ratio 1.000 | FLOP_red -89.6%
+  Fold 6 | Epoch 020 | Loss 0.1094 (task 0.1004, comp 0.0212, ratio 0.0900) | Val 0.8120 | Test 0.8136 | tau 1.71 | avg_ratio 1.000 | FLOP_red -89.6%
+  Fold 6 | Epoch 030 | Loss 0.0919 (task 0.0829, comp 0.0372, ratio 0.0900) | Val 0.8291 | Test 0.7881 | tau 1.56 | avg_ratio 1.000 | FLOP_red -89.6%
+  Fold 6 | Epoch 040 | Loss 0.0800 (task 0.0710, comp 0.0580, ratio 0.0900) | Val 0.8376 | Test 0.7797 | tau 1.41 | avg_ratio 1.000 | FLOP_red -89.6%
+  Fold 6 | Epoch 050 | Loss 0.0611 (task 0.0521, comp 0.0672, ratio 0.0900) | Val 0.7949 | Test 0.8051 | tau 1.26 | avg_ratio 1.000 | FLOP_red -89.6%
+  Fold 6 | Epoch 060 | Loss 0.0506 (task 0.0416, comp 0.0967, ratio 0.0900) | Val 0.7949 | Test 0.7119 | tau 1.11 | avg_ratio 1.000 | FLOP_red -89.6%
+  Fold 6 | Epoch 070 | Loss 0.0455 (task 0.0365, comp 0.1073, ratio 0.0900) | Val 0.7521 | Test 0.7712 | tau 0.95 | avg_ratio 1.000 | FLOP_red -89.6%
+  Fold 6 | Epoch 080 | Loss 0.0431 (task 0.0341, comp 0.1177, ratio 0.0900) | Val 0.7350 | Test 0.7119 | tau 0.80 | avg_ratio 1.000 | FLOP_red -89.6%
+  Fold 6 | Epoch 090 | Loss 0.0427 (task 0.0337, comp 0.1163, ratio 0.0900) | Val 0.7692 | Test 0.7881 | tau 0.65 | avg_ratio 1.000 | FLOP_red -89.6%
+  Fold 6 | Epoch 100 | Loss 0.0393 (task 0.0303, comp 0.1378, ratio 0.0900) | Val 0.6838 | Test 0.6949 | tau 0.50 | avg_ratio 1.000 | FLOP_red -89.6%
+  Epoch log saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_5/epoch_log.csv
+  Fold 6 BEST => Val: 0.8547 | Test: 0.7542 | Avg Token Ratio: 1.000 | FLOP Reduction: -76.0%
+  Per-graph stats saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_5/graph_stats.csv
+
+============================================================
+  FOLD 7 / 10
+  Train size: 943 (80%), Val size: 117 (10%), Test size: 118 (10%)
+============================================================
+  Fold 7 | Epoch 001 | Loss 0.5309 (task 0.5219, comp 0.0664, ratio 0.0900) | Val 0.4359 | Test 0.4153 | tau 2.00 | avg_ratio 1.000 | FLOP_red -38.1%
+  Fold 7 | Epoch 010 | Loss 0.1501 (task 0.1411, comp 0.0090, ratio 0.0900) | Val 0.7436 | Test 0.8136 | tau 1.86 | avg_ratio 1.000 | FLOP_red -38.1%
+  Fold 7 | Epoch 020 | Loss 0.1193 (task 0.1103, comp 0.0142, ratio 0.0900) | Val 0.5983 | Test 0.5678 | tau 1.71 | avg_ratio 1.000 | FLOP_red -38.1%
+  Fold 7 | Epoch 030 | Loss 0.1013 (task 0.0923, comp 0.0249, ratio 0.0900) | Val 0.7009 | Test 0.8220 | tau 1.56 | avg_ratio 1.000 | FLOP_red -38.1%
+  Fold 7 | Epoch 040 | Loss 0.0899 (task 0.0809, comp 0.0507, ratio 0.0900) | Val 0.7436 | Test 0.7203 | tau 1.41 | avg_ratio 1.000 | FLOP_red -38.1%
+  Fold 7 | Epoch 050 | Loss 0.0749 (task 0.0659, comp 0.0619, ratio 0.0900) | Val 0.6923 | Test 0.7797 | tau 1.26 | avg_ratio 1.000 | FLOP_red -38.1%
+  Fold 7 | Epoch 060 | Loss 0.0711 (task 0.0621, comp 0.0781, ratio 0.0900) | Val 0.7265 | Test 0.7034 | tau 1.11 | avg_ratio 1.000 | FLOP_red -38.1%
+  Fold 7 | Epoch 070 | Loss 0.0617 (task 0.0527, comp 0.0981, ratio 0.0900) | Val 0.6838 | Test 0.7881 | tau 0.95 | avg_ratio 1.000 | FLOP_red -38.1%
+  Fold 7 | Epoch 080 | Loss 0.0528 (task 0.0438, comp 0.1127, ratio 0.0900) | Val 0.7436 | Test 0.7373 | tau 0.80 | avg_ratio 1.000 | FLOP_red -38.1%
+  Fold 7 | Epoch 090 | Loss 0.0506 (task 0.0416, comp 0.1300, ratio 0.0900) | Val 0.7094 | Test 0.7881 | tau 0.65 | avg_ratio 1.000 | FLOP_red -38.1%
+  Fold 7 | Epoch 100 | Loss 0.0458 (task 0.0368, comp 0.1231, ratio 0.0900) | Val 0.7265 | Test 0.7966 | tau 0.50 | avg_ratio 1.000 | FLOP_red -38.1%
+  Epoch log saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_6/epoch_log.csv
+  Fold 7 BEST => Val: 0.8120 | Test: 0.8305 | Avg Token Ratio: 1.000 | FLOP Reduction: -47.3%
+  Per-graph stats saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_6/graph_stats.csv
+
+============================================================
+  FOLD 8 / 10
+  Train size: 943 (80%), Val size: 117 (10%), Test size: 118 (10%)
+============================================================
+  Fold 8 | Epoch 001 | Loss 0.4779 (task 0.4689, comp 0.1244, ratio 0.0900) | Val 0.6923 | Test 0.6780 | tau 2.00 | avg_ratio 1.000 | FLOP_red -86.2%
+  Fold 8 | Epoch 010 | Loss 0.1183 (task 0.1093, comp 0.0246, ratio 0.0900) | Val 0.6838 | Test 0.6949 | tau 1.86 | avg_ratio 1.000 | FLOP_red -86.2%
+  Fold 8 | Epoch 020 | Loss 0.1029 (task 0.0939, comp 0.0283, ratio 0.0900) | Val 0.8120 | Test 0.7203 | tau 1.71 | avg_ratio 1.000 | FLOP_red -86.2%
+  Fold 8 | Epoch 030 | Loss 0.0936 (task 0.0846, comp 0.0398, ratio 0.0900) | Val 0.7521 | Test 0.7373 | tau 1.56 | avg_ratio 1.000 | FLOP_red -86.2%
+  Fold 8 | Epoch 040 | Loss 0.0769 (task 0.0679, comp 0.0590, ratio 0.0900) | Val 0.7778 | Test 0.7119 | tau 1.41 | avg_ratio 1.000 | FLOP_red -86.2%
+  Fold 8 | Epoch 050 | Loss 0.0633 (task 0.0543, comp 0.0843, ratio 0.0900) | Val 0.7009 | Test 0.7288 | tau 1.26 | avg_ratio 1.000 | FLOP_red -86.2%
+  Fold 8 | Epoch 060 | Loss 0.0597 (task 0.0507, comp 0.1025, ratio 0.0900) | Val 0.7521 | Test 0.7797 | tau 1.11 | avg_ratio 1.000 | FLOP_red -86.2%
+  Fold 8 | Epoch 070 | Loss 0.0579 (task 0.0489, comp 0.1195, ratio 0.0900) | Val 0.7350 | Test 0.7458 | tau 0.95 | avg_ratio 1.000 | FLOP_red -86.2%
+  Fold 8 | Epoch 080 | Loss 0.0443 (task 0.0353, comp 0.1303, ratio 0.0900) | Val 0.7607 | Test 0.7627 | tau 0.80 | avg_ratio 1.000 | FLOP_red -86.2%
+  Fold 8 | Epoch 090 | Loss 0.0457 (task 0.0367, comp 0.1450, ratio 0.0900) | Val 0.7265 | Test 0.7712 | tau 0.65 | avg_ratio 1.000 | FLOP_red -86.2%
+  Fold 8 | Epoch 100 | Loss 0.0410 (task 0.0320, comp 0.1453, ratio 0.0900) | Val 0.7094 | Test 0.7288 | tau 0.50 | avg_ratio 1.000 | FLOP_red -86.2%
+  Epoch log saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_7/epoch_log.csv
+  Fold 8 BEST => Val: 0.8120 | Test: 0.7203 | Avg Token Ratio: 1.000 | FLOP Reduction: -46.3%
+  Per-graph stats saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_7/graph_stats.csv
+
+============================================================
+  FOLD 9 / 10
+  Train size: 944 (80%), Val size: 117 (10%), Test size: 117 (10%)
+============================================================
+  Fold 9 | Epoch 001 | Loss 0.3924 (task 0.3834, comp 0.0710, ratio 0.0900) | Val 0.5214 | Test 0.5299 | tau 2.00 | avg_ratio 1.000 | FLOP_red -71.5%
+  Fold 9 | Epoch 010 | Loss 0.1497 (task 0.1407, comp 0.0161, ratio 0.0900) | Val 0.4872 | Test 0.5812 | tau 1.86 | avg_ratio 1.000 | FLOP_red -71.5%
+  Fold 9 | Epoch 020 | Loss 0.0951 (task 0.0861, comp 0.0268, ratio 0.0900) | Val 0.7094 | Test 0.7094 | tau 1.71 | avg_ratio 1.000 | FLOP_red -71.5%
+  Fold 9 | Epoch 030 | Loss 0.0879 (task 0.0789, comp 0.0395, ratio 0.0900) | Val 0.5556 | Test 0.6239 | tau 1.56 | avg_ratio 1.000 | FLOP_red -71.5%
+  Fold 9 | Epoch 040 | Loss 0.0857 (task 0.0767, comp 0.0629, ratio 0.0900) | Val 0.7778 | Test 0.7863 | tau 1.41 | avg_ratio 1.000 | FLOP_red -71.5%
+  Fold 9 | Epoch 050 | Loss 0.0674 (task 0.0584, comp 0.0780, ratio 0.0900) | Val 0.7607 | Test 0.7350 | tau 1.26 | avg_ratio 1.000 | FLOP_red -71.5%
+  Fold 9 | Epoch 060 | Loss 0.0594 (task 0.0504, comp 0.1006, ratio 0.0900) | Val 0.6923 | Test 0.7265 | tau 1.11 | avg_ratio 1.000 | FLOP_red -71.5%
+  Fold 9 | Epoch 070 | Loss 0.0485 (task 0.0395, comp 0.1196, ratio 0.0900) | Val 0.6838 | Test 0.6923 | tau 0.95 | avg_ratio 1.000 | FLOP_red -71.5%
+  Fold 9 | Epoch 080 | Loss 0.0497 (task 0.0407, comp 0.1226, ratio 0.0900) | Val 0.6752 | Test 0.7607 | tau 0.80 | avg_ratio 1.000 | FLOP_red -71.5%
+  Fold 9 | Epoch 090 | Loss 0.0401 (task 0.0311, comp 0.1412, ratio 0.0900) | Val 0.6752 | Test 0.6838 | tau 0.65 | avg_ratio 1.000 | FLOP_red -71.5%
+  Fold 9 | Epoch 100 | Loss 0.0431 (task 0.0341, comp 0.1471, ratio 0.0900) | Val 0.7692 | Test 0.7436 | tau 0.50 | avg_ratio 1.000 | FLOP_red -71.5%
+  Epoch log saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_8/epoch_log.csv
+  Fold 9 BEST => Val: 0.8034 | Test: 0.7521 | Avg Token Ratio: 1.000 | FLOP Reduction: -39.4%
+  Per-graph stats saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_8/graph_stats.csv
+
+============================================================
+  FOLD 10 / 10
+  Train size: 944 (80%), Val size: 117 (10%), Test size: 117 (10%)
+============================================================
+  Fold 10 | Epoch 001 | Loss 0.3802 (task 0.3712, comp 0.0592, ratio 0.0900) | Val 0.7521 | Test 0.7436 | tau 2.00 | avg_ratio 1.000 | FLOP_red -72.5%
+  Fold 10 | Epoch 010 | Loss 0.1281 (task 0.1191, comp 0.0129, ratio 0.0900) | Val 0.8034 | Test 0.8120 | tau 1.86 | avg_ratio 1.000 | FLOP_red -72.5%
+  Fold 10 | Epoch 020 | Loss 0.1002 (task 0.0912, comp 0.0174, ratio 0.0900) | Val 0.6838 | Test 0.6923 | tau 1.71 | avg_ratio 1.000 | FLOP_red -72.5%
+  Fold 10 | Epoch 030 | Loss 0.0940 (task 0.0850, comp 0.0312, ratio 0.0900) | Val 0.7350 | Test 0.7949 | tau 1.56 | avg_ratio 1.000 | FLOP_red -72.5%
+  Fold 10 | Epoch 040 | Loss 0.0820 (task 0.0730, comp 0.0486, ratio 0.0900) | Val 0.7863 | Test 0.7778 | tau 1.41 | avg_ratio 1.000 | FLOP_red -72.5%
+  Fold 10 | Epoch 050 | Loss 0.0713 (task 0.0623, comp 0.0879, ratio 0.0900) | Val 0.7436 | Test 0.7778 | tau 1.26 | avg_ratio 1.000 | FLOP_red -72.5%
+  Fold 10 | Epoch 060 | Loss 0.0595 (task 0.0505, comp 0.0874, ratio 0.0900) | Val 0.7265 | Test 0.7692 | tau 1.11 | avg_ratio 1.000 | FLOP_red -72.5%
+  Fold 10 | Epoch 070 | Loss 0.0560 (task 0.0470, comp 0.1067, ratio 0.0900) | Val 0.7350 | Test 0.7094 | tau 0.95 | avg_ratio 1.000 | FLOP_red -72.5%
+  Fold 10 | Epoch 080 | Loss 0.0483 (task 0.0393, comp 0.1207, ratio 0.0900) | Val 0.7949 | Test 0.7521 | tau 0.80 | avg_ratio 1.000 | FLOP_red -72.5%
+  Fold 10 | Epoch 090 | Loss 0.0524 (task 0.0434, comp 0.1421, ratio 0.0900) | Val 0.7436 | Test 0.7521 | tau 0.65 | avg_ratio 1.000 | FLOP_red -72.5%
+  Fold 10 | Epoch 100 | Loss 0.0439 (task 0.0349, comp 0.1458, ratio 0.0900) | Val 0.7778 | Test 0.7607 | tau 0.50 | avg_ratio 1.000 | FLOP_red -72.5%
+  Epoch log saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_9/epoch_log.csv
+  Fold 10 BEST => Val: 0.8291 | Test: 0.7607 | Avg Token Ratio: 1.000 | FLOP Reduction: -3.9%
+  Per-graph stats saved to: exps/DD_adaptive_cv10-04_13-15_34_02/fold_9/graph_stats.csv
+
+============================================================
+Cross-Validation Summary (10 folds)
+  Val  Acc: 0.8145 ± 0.0195
+  Test Acc: 0.7615 ± 0.0357
+  Avg Token Ratio: 1.0000 ± 0.0000
+  FLOP Reduction:  -28.5% ± 40.4%
+  Results saved to: ./results/DD/cv_summary_12344.csv
+============================================================
