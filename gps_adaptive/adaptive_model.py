@@ -40,8 +40,8 @@ class BudgetNet(nn.Module):
         self.num_layers = num_layers
         self.min_ratio = min_token_ratio
         self.max_ratio = max_token_ratio
-        if self.max_ratio <= self.min_ratio:
-            raise ValueError("max_token_ratio must be greater than min_token_ratio")
+        if self.max_ratio < self.min_ratio:
+            raise ValueError("max_token_ratio must be greater than or equal to min_token_ratio")
         if not 0.0 <= size_prior_mix <= 1.0:
             raise ValueError("size_prior_mix must be in [0, 1]")
         if size_prior_temp <= 0.0:
